@@ -1,0 +1,1592 @@
+basePath: /api
+definitions:
+  features_clubs_presentation.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  features_payments_presentation.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  presentation.AddMemberRequest:
+    properties:
+      userSlug:
+        type: string
+    required:
+    - userSlug
+    type: object
+  presentation.BookingResponse:
+    properties:
+      createdAt:
+        type: string
+      endTime:
+        type: string
+      id:
+        type: integer
+      notes:
+        type: string
+      paymentStatus:
+        type: string
+      pistaId:
+        type: integer
+      pistaName:
+        type: string
+      pistaType:
+        type: string
+      priceSnapshotCents:
+        type: integer
+      priceSnapshotEuros:
+        description: Convertido a euros para UI
+        type: number
+      startTime:
+        type: string
+      status:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        type: integer
+      userName:
+        type: string
+    type: object
+  presentation.ClassResponse:
+    properties:
+      capacity:
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      enrolledCount:
+        type: integer
+      enrollments:
+        items:
+          $ref: '#/definitions/presentation.EnrollmentResponse'
+        type: array
+      id:
+        type: integer
+      instructorId:
+        type: integer
+      instructorName:
+        type: string
+      pistaId:
+        type: integer
+      pistaName:
+        type: string
+      priceCents:
+        type: integer
+      priceEuros:
+        type: number
+      slug:
+        type: string
+      startTime:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  presentation.ClubMembershipResponse:
+    properties:
+      clubId:
+        type: integer
+      clubName:
+        type: string
+      clubSlug:
+        type: string
+      createdAt:
+        type: string
+      endDate:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      nextBillingDate:
+        type: string
+      paymentStatus:
+        type: string
+      startDate:
+        type: string
+      status:
+        type: string
+      updatedAt:
+        type: string
+      userEmail:
+        type: string
+      userId:
+        type: integer
+      userName:
+        type: string
+      userSlug:
+        type: string
+    type: object
+  presentation.ClubResponse:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      logoUrl:
+        type: string
+      maxMembers:
+        type: integer
+      memberCount:
+        type: integer
+      monthlyFeeCents:
+        type: integer
+      monthlyFeeEuros:
+        type: number
+      name:
+        type: string
+      ownerId:
+        type: integer
+      ownerName:
+        type: string
+      ownerSlug:
+        type: string
+      slug:
+        type: string
+      status:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  presentation.CreateBookingPaymentRequest:
+    properties:
+      amount_cents:
+        type: integer
+      booking_id:
+        type: integer
+      customer_id:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - amount_cents
+    - booking_id
+    - customer_id
+    - user_id
+    type: object
+  presentation.CreateBookingRequest:
+    properties:
+      endTime:
+        type: string
+      notes:
+        type: string
+      pistaId:
+        minimum: 1
+        type: integer
+      startTime:
+        type: string
+      userId:
+        type: integer
+    required:
+    - endTime
+    - pistaId
+    - startTime
+    type: object
+  presentation.CreateClassPaymentRequest:
+    properties:
+      amount_cents:
+        type: integer
+      customer_id:
+        type: string
+      enrollment_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - amount_cents
+    - customer_id
+    - enrollment_id
+    - user_id
+    type: object
+  presentation.CreateClassRequest:
+    properties:
+      description:
+        type: string
+      endTime:
+        type: string
+      instructorId:
+        type: integer
+      maxCapacity:
+        maximum: 20
+        minimum: 1
+        type: integer
+      pistaId:
+        type: integer
+      priceCents:
+        minimum: 0
+        type: integer
+      startTime:
+        type: string
+      title:
+        minLength: 3
+        type: string
+    required:
+    - endTime
+    - instructorId
+    - maxCapacity
+    - pistaId
+    - priceCents
+    - startTime
+    - title
+    type: object
+  presentation.CreateClubPaymentRequest:
+    properties:
+      amount_cents:
+        type: integer
+      customer_id:
+        type: string
+      membership_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - amount_cents
+    - customer_id
+    - membership_id
+    - user_id
+    type: object
+  presentation.CreateClubRequest:
+    properties:
+      description:
+        type: string
+      isActive:
+        type: boolean
+      logoUrl:
+        type: string
+      maxMembers:
+        minimum: 1
+        type: integer
+      monthlyFeeCents:
+        minimum: 0
+        type: integer
+      name:
+        type: string
+      ownerSlug:
+        type: string
+    required:
+    - maxMembers
+    - name
+    type: object
+  presentation.CreatePaymentRequest:
+    properties:
+      amount_cents:
+        type: integer
+      customer_id:
+        type: string
+      description:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - amount_cents
+    - customer_id
+    - description
+    - user_id
+    type: object
+  presentation.CreatePistaRequest:
+    properties:
+      image_url:
+        type: string
+      nombre:
+        maxLength: 100
+        minLength: 1
+        type: string
+      precio_hora_base:
+        minimum: 0
+        type: number
+      superficie:
+        type: string
+      tipo:
+        enum:
+        - FUTBOL
+        - TENIS
+        - BALONCESTO
+        - PADEL
+        - POLIDEPORTIVA
+        type: string
+    required:
+    - nombre
+    - precio_hora_base
+    - tipo
+    type: object
+  presentation.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      fullName:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+      roleId:
+        type: integer
+    required:
+    - email
+    - fullName
+    - password
+    type: object
+  presentation.EnrollUserRequest:
+    properties:
+      user_slug:
+        type: string
+    required:
+    - user_slug
+    type: object
+  presentation.EnrollmentResponse:
+    properties:
+      classId:
+        type: integer
+      className:
+        type: string
+      enrolledAt:
+        description: Alias para compatibilidad
+        type: string
+      id:
+        type: integer
+      registeredAt:
+        type: string
+      status:
+        type: string
+      userEmail:
+        type: string
+      userId:
+        type: integer
+      userName:
+        type: string
+    type: object
+  presentation.PaymentResponse:
+    properties:
+      amount_cents:
+        type: integer
+      amount_euros:
+        type: number
+      booking_id:
+        type: integer
+      class_enrollment_id:
+        type: integer
+      club_membership_id:
+        type: integer
+      created_at:
+        type: string
+      currency:
+        type: string
+      id:
+        type: integer
+      payment_type:
+        type: string
+      provider:
+        type: string
+      status:
+        type: string
+      stripe_payment_intent_id:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  presentation.PistaPagedResponse:
+    properties:
+      items:
+        description: Tus DTOs de pista normales
+        items:
+          $ref: '#/definitions/presentation.PistaResponse'
+        type: array
+      limit:
+        description: Items por página
+        type: integer
+      page:
+        description: Página actual
+        type: integer
+      total:
+        description: Total de resultados en BD
+        type: integer
+      total_pages:
+        description: Total de páginas
+        type: integer
+    type: object
+  presentation.PistaResponse:
+    properties:
+      esActiva:
+        type: boolean
+      estado:
+        type: string
+      id:
+        type: integer
+      imageUrl:
+        type: string
+      nombre:
+        type: string
+      precioHoraBase:
+        type: number
+      superficie:
+        type: string
+      tipo:
+        type: string
+    type: object
+  presentation.RefundPaymentRequest:
+    properties:
+      payment_id:
+        type: integer
+    required:
+    - payment_id
+    type: object
+  presentation.RenewMembershipRequest:
+    properties:
+      customerId:
+        type: string
+    required:
+    - customerId
+    type: object
+  presentation.RoleDTO:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  presentation.UpdateBillingDateRequest:
+    properties:
+      nextBillingDate:
+        type: string
+    required:
+    - nextBillingDate
+    type: object
+  presentation.UpdateBookingRequest:
+    properties:
+      endTime:
+        type: string
+      notes:
+        type: string
+      paymentStatus:
+        type: string
+      pistaId:
+        minimum: 1
+        type: integer
+      startTime:
+        type: string
+      status:
+        type: string
+      userId:
+        type: integer
+    required:
+    - endTime
+    - pistaId
+    - startTime
+    type: object
+  presentation.UpdateClassRequest:
+    properties:
+      description:
+        type: string
+      endTime:
+        type: string
+      instructorId:
+        type: integer
+      maxCapacity:
+        maximum: 20
+        minimum: 1
+        type: integer
+      pistaId:
+        type: integer
+      priceCents:
+        minimum: 0
+        type: integer
+      startTime:
+        type: string
+      status:
+        type: string
+      title:
+        minLength: 3
+        type: string
+    required:
+    - endTime
+    - instructorId
+    - maxCapacity
+    - pistaId
+    - priceCents
+    - startTime
+    - title
+    type: object
+  presentation.UpdateClubRequest:
+    properties:
+      description:
+        type: string
+      isActive:
+        type: boolean
+      logoUrl:
+        type: string
+      maxMembers:
+        minimum: 1
+        type: integer
+      monthlyFeeCents:
+        minimum: 0
+        type: integer
+      name:
+        type: string
+      ownerSlug:
+        type: string
+      status:
+        type: string
+    required:
+    - maxMembers
+    - name
+    type: object
+  presentation.UpdatePistaRequest:
+    properties:
+      es_activa:
+        type: boolean
+      estado:
+        enum:
+        - DISPONIBLE
+        - MANTENIMIENTO
+        - INACTIVA
+        type: string
+      image_url:
+        type: string
+      nombre:
+        maxLength: 100
+        minLength: 1
+        type: string
+      precio_hora_base:
+        minimum: 0
+        type: number
+      superficie:
+        type: string
+      tipo:
+        enum:
+        - FUTBOL
+        - TENIS
+        - BALONCESTO
+        - PADEL
+        - POLIDEPORTIVA
+        type: string
+    required:
+    - estado
+    - nombre
+    - precio_hora_base
+    - tipo
+    type: object
+  presentation.UpdateUserRequest:
+    properties:
+      fullName:
+        type: string
+      isActive:
+        type: boolean
+      phone:
+        type: string
+      roleId:
+        type: integer
+    type: object
+  presentation.UserResponse:
+    properties:
+      avatarUrl:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      fullName:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      phone:
+        type: string
+      roleId:
+        type: integer
+      roleName:
+        type: string
+      slug:
+        type: string
+      stripeCustomerId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API REST para gestión de instalaciones deportivas
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: PoliManage API
+  version: "1.0"
+paths:
+  /api/bookings:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/presentation.BookingResponse'
+            type: array
+      summary: Listar todas las reservas
+      tags:
+      - bookings
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos de la reserva
+        in: body
+        name: booking
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.CreateBookingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.BookingResponse'
+      summary: Crear una nueva reserva
+      tags:
+      - bookings
+  /api/bookings/{id}:
+    delete:
+      parameters:
+      - description: ID de la reserva
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Eliminar una reserva
+      tags:
+      - bookings
+    get:
+      parameters:
+      - description: ID de la reserva
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.BookingResponse'
+      summary: Obtener reserva por ID
+      tags:
+      - bookings
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID de la reserva
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos a actualizar
+        in: body
+        name: booking
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.UpdateBookingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.BookingResponse'
+      summary: Actualizar una reserva
+      tags:
+      - bookings
+  /api/bookings/{id}/cancel:
+    post:
+      parameters:
+      - description: ID de la reserva
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.BookingResponse'
+      summary: Cancelar una reserva
+      tags:
+      - bookings
+  /api/bookings/pista/{pistaId}/date/{date}:
+    get:
+      parameters:
+      - description: ID de la pista
+        in: path
+        name: pistaId
+        required: true
+        type: integer
+      - description: Fecha (YYYY-MM-DD)
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/presentation.BookingResponse'
+            type: array
+      summary: Obtener reservas por pista y fecha
+      tags:
+      - bookings
+  /api/classes:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/presentation.ClassResponse'
+            type: array
+      summary: Listar todas las clases
+      tags:
+      - classes
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos de la clase
+        in: body
+        name: class
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.CreateClassRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.ClassResponse'
+      summary: Crear una nueva clase
+      tags:
+      - classes
+  /api/classes/{slug}:
+    delete:
+      parameters:
+      - description: Slug de la clase
+        in: path
+        name: slug
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Eliminar una clase
+      tags:
+      - classes
+    get:
+      parameters:
+      - description: Slug de la clase
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.ClassResponse'
+      summary: Obtener clase por slug
+      tags:
+      - classes
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Slug de la clase
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: Datos a actualizar
+        in: body
+        name: class
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.UpdateClassRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.ClassResponse'
+      summary: Actualizar una clase
+      tags:
+      - classes
+  /api/classes/{slug}/cancel:
+    post:
+      parameters:
+      - description: Slug de la clase
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.ClassResponse'
+      summary: Cancelar una clase
+      tags:
+      - classes
+  /api/classes/{slug}/enroll:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Slug de la clase
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: Datos de inscripción
+        in: body
+        name: enrollment
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.EnrollUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Inscribir usuario en una clase
+      tags:
+      - enrollments
+  /api/classes/{slug}/enrollments:
+    get:
+      parameters:
+      - description: ID de la clase
+        in: query
+        name: classID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/presentation.EnrollmentResponse'
+            type: array
+      summary: Obtener inscripciones de una clase
+      tags:
+      - enrollments
+  /api/classes/instructor/{instructorId}:
+    get:
+      parameters:
+      - description: ID del instructor
+        in: path
+        name: instructorId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/presentation.ClassResponse'
+            type: array
+      summary: Obtener clases por instructor
+      tags:
+      - classes
+  /api/enrollments/{id}:
+    delete:
+      parameters:
+      - description: ID de la inscripción
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Cancelar inscripción de un usuario
+      tags:
+      - enrollments
+  /api/payments:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos del pago
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.CreatePaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.PaymentResponse'
+      summary: Procesar un pago
+      tags:
+      - payments
+  /api/payments/{id}:
+    get:
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.PaymentResponse'
+      summary: Obtener pago por ID
+      tags:
+      - payments
+  /api/payments/booking:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos del pago de reserva
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.CreateBookingPaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.PaymentResponse'
+      summary: Procesar pago de reserva
+      tags:
+      - payments
+  /api/payments/class:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos del pago de clase
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.CreateClassPaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.PaymentResponse'
+      summary: Procesar pago de clase
+      tags:
+      - payments
+  /api/payments/club:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos del pago de membresía
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.CreateClubPaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.PaymentResponse'
+      summary: Procesar pago de membresía
+      tags:
+      - payments
+  /api/payments/refund:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos del reembolso
+        in: body
+        name: refund
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.RefundPaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/features_payments_presentation.MessageResponse'
+      summary: Reembolsar un pago
+      tags:
+      - payments
+  /api/payments/user/{user_id}:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/presentation.PaymentResponse'
+            type: array
+      summary: Obtener pagos de usuario
+      tags:
+      - payments
+  /api/pistas:
+    get:
+      parameters:
+      - description: Búsqueda por nombre o ubicación
+        in: query
+        name: q
+        type: string
+      - description: Filtro por tipo de deporte (FUTBOL, TENIS, BALONCESTO, PADEL,
+          POLIDEPORTIVA)
+        in: query
+        name: deporte
+        type: string
+      - description: Precio mínimo por hora (en euros)
+        in: query
+        name: min_price
+        type: integer
+      - description: Precio máximo por hora (en euros)
+        in: query
+        name: max_price
+        type: integer
+      - default: id_desc
+        description: 'Ordenación: precio_asc, precio_desc, nombre_asc, nombre_desc'
+        in: query
+        name: sort
+        type: string
+      - default: 1
+        description: Número de página
+        in: query
+        name: page
+        type: integer
+      - default: 12
+        description: Items por página
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.PistaPagedResponse'
+      summary: Listar pistas con filtros avanzados
+      tags:
+      - pistas
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos de la pista
+        in: body
+        name: pista
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.CreatePistaRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.PistaResponse'
+      summary: Crear una nueva pista
+      tags:
+      - pistas
+  /api/pistas/{id}:
+    delete:
+      parameters:
+      - description: ID de la pista
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Eliminar una pista
+      tags:
+      - pistas
+    get:
+      parameters:
+      - description: ID de la pista
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.PistaResponse'
+      summary: Obtener pista por ID
+      tags:
+      - pistas
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID de la pista
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos a actualizar
+        in: body
+        name: pista
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.UpdatePistaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.PistaResponse'
+      summary: Actualizar una pista
+      tags:
+      - pistas
+  /api/roles:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/presentation.RoleDTO'
+            type: array
+      summary: Listar todos los roles
+      tags:
+      - roles
+  /api/users:
+    get:
+      parameters:
+      - description: Filtrar por rol
+        in: query
+        name: role_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/presentation.UserResponse'
+            type: array
+      summary: Listar todos los usuarios
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos del usuario
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.UserResponse'
+      summary: Crear un nuevo usuario
+      tags:
+      - users
+  /api/users/{slug}:
+    delete:
+      parameters:
+      - description: Slug del usuario
+        in: path
+        name: slug
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Eliminar un usuario
+      tags:
+      - users
+    get:
+      parameters:
+      - description: Slug del usuario
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.UserResponse'
+      summary: Obtener usuario por slug
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Slug del usuario
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: Datos a actualizar
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.UserResponse'
+      summary: Actualizar un usuario
+      tags:
+      - users
+  /clubs:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/presentation.ClubResponse'
+            type: array
+      summary: Lista todos los clubs
+      tags:
+      - Clubs
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos del club
+        in: body
+        name: club
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.CreateClubRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.ClubResponse'
+      summary: Crea un nuevo club
+      tags:
+      - Clubs
+  /clubs/{slug}:
+    delete:
+      parameters:
+      - description: Club slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Elimina un club
+      tags:
+      - Clubs
+    get:
+      parameters:
+      - description: Club slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.ClubResponse'
+      summary: Obtiene un club por slug
+      tags:
+      - Clubs
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Club slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: Datos del club
+        in: body
+        name: club
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.UpdateClubRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.ClubResponse'
+      summary: Actualiza un club existente
+      tags:
+      - Clubs
+  /clubs/{slug}/members:
+    get:
+      parameters:
+      - description: Club slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/presentation.ClubMembershipResponse'
+            type: array
+      summary: Obtiene los miembros de un club
+      tags:
+      - Clubs
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Club slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: Datos del miembro
+        in: body
+        name: member
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.AddMemberRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.ClubMembershipResponse'
+      summary: Añade un miembro a un club
+      tags:
+      - Clubs
+  /clubs/memberships/{id}:
+    delete:
+      parameters:
+      - description: Membership ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Elimina un miembro de un club
+      tags:
+      - Clubs
+  /clubs/memberships/{id}/billing-date:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Membership ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Nueva fecha
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.UpdateBillingDateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/features_clubs_presentation.MessageResponse'
+      summary: Actualiza la fecha de próximo cobro
+      tags:
+      - Clubs
+  /clubs/memberships/{id}/cancel:
+    post:
+      parameters:
+      - description: Membership ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/features_clubs_presentation.MessageResponse'
+      summary: Cancela permanentemente una membresía
+      tags:
+      - Clubs
+  /clubs/memberships/{id}/renew:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Membership ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos del pago
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/presentation.RenewMembershipRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/features_clubs_presentation.MessageResponse'
+      summary: Renueva una membresía procesando el pago
+      tags:
+      - Clubs
+  /clubs/memberships/{id}/resume:
+    post:
+      parameters:
+      - description: Membership ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/features_clubs_presentation.MessageResponse'
+      summary: Reanuda una membresía suspendida
+      tags:
+      - Clubs
+  /clubs/memberships/{id}/suspend:
+    post:
+      parameters:
+      - description: Membership ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/features_clubs_presentation.MessageResponse'
+      summary: Suspende una membresía
+      tags:
+      - Clubs
+schemes:
+- http
+swagger: "2.0"

@@ -1,0 +1,116 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: polimanage-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: polimanage
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - polimanage-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d polimanage"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin 4
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: polimanage-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@polimanage.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - polimanage-network
+    depends_on:
+      - postgres
+
+  # Backend Go
+  backend-go:
+    build:
+      context: ./backend-go
+      dockerfile: Dockerfile
+    container_name: polimanage-backend-go
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: 1234
+      DB_NAME: polimanage
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - polimanage-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend-go:/app
+
+  # Backend Python
+  backend-python:
+    build:
+      context: ./backend-python
+      dockerfile: Dockerfile
+    container_name: polimanage-backend-python
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: 1234
+      DB_NAME: polimanage
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    networks:
+      - polimanage-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend-python:/app
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: polimanage-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_GO_URL: http://localhost:8080
+      VITE_API_PYTHON_URL: http://localhost:8000
+    ports:
+      - "5173:80"
+    networks:
+      - polimanage-network
+    depends_on:
+      - backend-go
+      - backend-python
+
+networks:
+  polimanage-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
