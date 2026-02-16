@@ -30,3 +30,6 @@ logs/
 *.tmp
 *.temp
 .cache/
+
+start.ps1
+db_init.sql

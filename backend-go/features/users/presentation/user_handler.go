@@ -118,7 +118,7 @@ func (h *UserHandler) Update(c *fiber.Ctx) error {
 
 	// Obtener usuario actualizado para devolverlo completo
 	updated, _ := h.service.GetBySlug(slug)
-	
+
 	// serializer_user
 	return c.JSON(ToUserResponse(updated))
 }

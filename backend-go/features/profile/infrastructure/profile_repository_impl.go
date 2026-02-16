@@ -22,7 +22,7 @@ func NewProfileRepository(db *gorm.DB) *ProfileRepositoryImpl {
 // GetProfileByUsername obtiene el perfil de un usuario por username/slug
 func (r *ProfileRepositoryImpl) GetProfileByUsername(username string) (*domain.Profile, error) {
 	var user database.User
-	
+
 	// Buscar usuario por slug
 	if err := r.db.Where("slug = ?", username).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {

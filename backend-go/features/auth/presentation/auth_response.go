@@ -10,5 +10,5 @@ import userpresentation "backend-go/features/users/presentation"
 // AuthResponse respuesta de autenticación (login/register)
 type AuthResponse struct {
 	User  userpresentation.UserResponse `json:"user"`
-	Token string                         `json:"token"`
+	Token string                        `json:"token"`
 }

@@ -15,7 +15,7 @@ func RegisterAuthRoutes(app *fiber.App, handler *AuthHandler) {
 	// Rutas públicas (sin autenticación)
 	auth.Post("/register", handler.Register)
 	auth.Post("/login", handler.Login)
-	
+
 	// Rutas protegidas se registran desde el main con middleware JWT
 }
 

@@ -17,7 +17,7 @@ import (
 var (
 	// ErrTokenExpired se retorna cuando el token ha expirado
 	ErrTokenExpired = errors.New("token ha expirado")
-	
+
 	// ErrInvalidToken se retorna cuando el token no es válido
 	ErrInvalidToken = errors.New("token inválido")
 )
@@ -45,7 +45,7 @@ type CustomClaims struct {
 // GenerateToken genera un nuevo token JWT
 func (s *JWTServiceImpl) GenerateToken(claims JWTClaims, expiresIn time.Duration) (string, error) {
 	now := time.Now()
-	
+
 	jwtClaims := CustomClaims{
 		UserID:   claims.UserID.String(),
 		Email:    claims.Email,
@@ -59,7 +59,7 @@ func (s *JWTServiceImpl) GenerateToken(claims JWTClaims, expiresIn time.Duration
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaims)
-	
+
 	tokenString, err := token.SignedString(s.secretKey)
 	if err != nil {
 		return "", fmt.Errorf("error firmando token: %w", err)

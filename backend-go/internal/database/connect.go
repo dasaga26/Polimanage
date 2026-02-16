@@ -215,7 +215,7 @@ func seedDemoData() {
 
 	// Crear servicio de encriptación Argon2id
 	cryptoService := security.NewArgon2CryptoService()
-	
+
 	// Hashear contraseña "admin123"
 	adminHash, _ := cryptoService.HashPassword("admin123")
 

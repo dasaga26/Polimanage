@@ -9,15 +9,15 @@ import (
 	authApp "backend-go/features/auth/application"
 	authInfra "backend-go/features/auth/infrastructure"
 	authPres "backend-go/features/auth/presentation"
-	
+
 	// Shared Security Services (Crypto, JWT)
 	"backend-go/shared/security"
-	
+
 	// Feature USERS (getUser, update)
 	userApp "backend-go/features/users/application"
 	userInfra "backend-go/features/users/infrastructure"
 	userPres "backend-go/features/users/presentation"
-	
+
 	// Feature PROFILE (getProfile, follow, unfollow)
 	profileApp "backend-go/features/profile/application"
 	profileInfra "backend-go/features/profile/infrastructure"
@@ -93,41 +93,41 @@ func main() {
 	// SHARED SECURITY SERVICES (Argon2, JWT)
 	// ============================================================
 	cryptoService := security.NewArgon2CryptoService()
-	
+
 	// Leer JWT secret desde variable de entorno
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
 		log.Fatal("❌ JWT_SECRET no está configurado en las variables de entorno")
 	}
 	jwtService := security.NewJWTService(jwtSecret)
-	
+
 	// ============================================================
 	// MÓDULO 1: FEATURE AUTH (CtrlAuth: register, login, logout)
 	// ============================================================
 	// Infraestructura - Servicios específicos de Auth (Pravatar)
 	avatarService := authInfra.NewPravatarService()
-	
+
 	// Repository compartido
 	userRepo := userInfra.NewUserRepository(database.DB)
-	
+
 	// Aplicación - AuthService
 	authService := authApp.NewAuthService(userRepo, cryptoService, jwtService, avatarService)
-	
+
 	// Presentación - AuthHandler
 	authHandler := authPres.NewAuthHandler(authService)
-	
+
 	// Rutas públicas Auth
 	authPres.RegisterAuthRoutes(app, authHandler)
-	
+
 	// ============================================================
 	// MÓDULO 2: FEATURE USERS (CtrlUser: getUser, update, updatePassword)
 	// ============================================================
 	// Aplicación - UserService (usa CryptoService para UpdatePassword)
 	userService := userApp.NewUserService(userRepo, cryptoService)
-	
+
 	// Presentación - UserHandler
 	userHandler := userPres.NewUserHandler(userService)
-	
+
 	// Rutas Users
 	userPres.RegisterRoutes(app, userHandler)
 
@@ -136,13 +136,13 @@ func main() {
 	// ============================================================
 	// Repository Profile
 	profileRepo := profileInfra.NewProfileRepository(database.DB)
-	
+
 	// Aplicación - ProfileService
 	profileService := profileApp.NewProfileService(profileRepo)
-	
+
 	// Presentación - ProfileHandler
 	profileHandler := profilePres.NewProfileHandler(profileService)
-	
+
 	// Rutas Profile
 	profilePres.RegisterProfileRoutes(app, profileHandler)
 
@@ -210,7 +210,7 @@ func main() {
 	// RUTAS PROTEGIDAS CON JWT MIDDLEWARE
 	// 🧠 El backend NO confía en el JWT - Validación en 7 pasos
 	// ============================================================
-	
+
 	// Auth protegidas (GET /me, POST /refresh, POST /logout)
 	protectedAuth := app.Group("/api/auth")
 	protectedAuth.Use(sharedMiddleware.JWTMiddleware(jwtService))

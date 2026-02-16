@@ -66,7 +66,7 @@ func (s *UserService) UpdateBySlug(slug string, updates *domain.User) error {
 	if updates.RoleID > 0 {
 		existing.RoleID = updates.RoleID
 	}
-	
+
 	// IsActive siempre se actualiza
 	existing.IsActive = updates.IsActive
 

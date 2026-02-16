@@ -25,7 +25,7 @@ type JWTClaims struct {
 type JWTService interface {
 	// GenerateToken genera un nuevo token JWT
 	GenerateToken(claims JWTClaims, expiresIn time.Duration) (string, error)
-	
+
 	// ValidateToken valida y extrae los claims del token JWT
 	// Realiza validación completa en 7 pasos:
 	// 1. ¿Existe token?
@@ -36,7 +36,7 @@ type JWTService interface {
 	// 6. Parsing de UserID UUID válido
 	// 7. Token NO se confía ciegamente
 	ValidateToken(token string) (*JWTClaims, error)
-	
+
 	// RefreshToken genera un nuevo token a partir de uno existente válido
 	RefreshToken(oldToken string) (string, error)
 }

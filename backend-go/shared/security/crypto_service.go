@@ -11,7 +11,7 @@ package security
 type CryptoService interface {
 	// HashPassword genera un hash seguro de la contraseña
 	HashPassword(password string) (string, error)
-	
+
 	// VerifyPassword verifica si la contraseña coincide con el hash
 	VerifyPassword(password, hash string) (bool, error)
 }
