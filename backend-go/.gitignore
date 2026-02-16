@@ -1,0 +1,55 @@
+# ============================================================
+# BACKEND GO - .gitignore
+# ============================================================
+
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+main
+
+# Test binaries
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+
+# Environment variables (contienen JWT_SECRET y credenciales DB)
+.env
+.env.local
+.env.*.local
+
+# Air live reload
+tmp/
+.air.toml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Swagger generated files (opcional, si se regeneran automáticamente)
+# docs/
+
+# Build artifacts
+dist/
+build/

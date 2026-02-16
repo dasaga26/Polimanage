@@ -1,0 +1,32 @@
+# ============================================================
+# POLIMANAGE PROJECT - Root .gitignore
+# ============================================================
+
+# Environment variables (contienen secretos sensibles)
+.env
+.env.local
+.env.*.local
+
+# Docker volumes data
+postgres_data/
+pgadmin_data/
+
+# IDE - VSCode
+.vscode/
+.idea/
+
+# System Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
