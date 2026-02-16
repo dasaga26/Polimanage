@@ -5,17 +5,17 @@ services:
     container_name: polimanage-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: polimanage
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${POSTGRES_EXTERNAL_PORT}:5432"
     networks:
       - polimanage-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d polimanage"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,13 +26,13 @@ services:
     container_name: polimanage-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@polimanage.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     ports:
-      - "5050:80"
+      - "${PGADMIN_EXTERNAL_PORT}:80"
     networks:
       - polimanage-network
     depends_on:
@@ -46,15 +46,15 @@ services:
     container_name: polimanage-backend-go
     restart: unless-stopped
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: 1234
-      DB_NAME: polimanage
-      JWT_SECRET: polimanage-super-secret-key-change-in-production-2026
-      PORT: 8080
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: ${GO_PORT}
     ports:
-      - "8080:8080"
+      - "${GO_PORT}:8080"
     networks:
       - polimanage-network
     depends_on:
@@ -71,14 +71,14 @@ services:
     container_name: polimanage-backend-python
     restart: unless-stopped
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: 1234
-      DB_NAME: polimanage
-      PORT: 8000
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      PORT: ${PYTHON_PORT}
     ports:
-      - "8000:8000"
+      - "${PYTHON_PORT}:8000"
     networks:
       - polimanage-network
     depends_on:
@@ -95,10 +95,10 @@ services:
     container_name: polimanage-frontend
     restart: unless-stopped
     environment:
-      VITE_API_GO_URL: http://localhost:8080
-      VITE_API_PYTHON_URL: http://localhost:8000
+      VITE_API_GO_URL: ${VITE_API_GO_URL}
+      VITE_API_PYTHON_URL: ${VITE_API_PYTHON_URL}
     ports:
-      - "5173:80"
+      - "${FRONTEND_PORT}:80"
     networks:
       - polimanage-network
     depends_on:
