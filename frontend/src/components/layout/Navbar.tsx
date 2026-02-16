@@ -1,10 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { isAuthenticated, user, logout } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -13,6 +15,11 @@ export const Navbar = () => {
     { path: '/reservar', label: 'Reservar Pista' },
     { path: '/clases', label: 'Clases' }
   ];
+
+  const handleLogout = () => {
+    logout();
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm">
@@ -47,21 +54,55 @@ export const Navbar = () => {
             ))}
           </div>
 
-          {/* CTA & Mobile Menu Button */}
-          <div className="flex items-center gap-4">
-            <Link
-              to="/reservar"
-              className="hidden md:flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all shadow-md shadow-blue-600/20"
-            >
-              Reservar Ahora
-            </Link>
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+          {/* Auth & CTA */}
+          <div className="hidden md:flex items-center gap-4">
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to={`/profile/${user?.slug}`}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <img
+                    src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.fullName}`}
+                    alt={user?.fullName}
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <span>{user?.fullName}</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Salir</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  <span>Iniciar Sesión</span>
+                </Link>
+                <Link
+                  to="/reservar"
+                  className="flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all shadow-md shadow-blue-600/20"
+                >
+                  Reservar Ahora
+                </Link>
+              </>
+            )}
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
 
         {/* Mobile Menu */}
@@ -82,13 +123,48 @@ export const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                to="/reservar"
-                onClick={() => setIsMenuOpen(false)}
-                className="mx-4 mt-2 flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all"
-              >
-                Reservar Ahora
-              </Link>
+              
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to={`/profile/${user?.slug}`}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <img
+                      src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.fullName}`}
+                      alt={user?.fullName}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span>{user?.fullName}</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="mx-4 flex items-center justify-center gap-2 h-10 px-6 rounded-full bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition-all"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Cerrar Sesión</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="mx-4 flex items-center justify-center gap-2 h-10 px-6 rounded-full border-2 border-blue-600 text-blue-600 text-sm font-bold hover:bg-blue-50 transition-all"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Iniciar Sesión</span>
+                  </Link>
+                  <Link
+                    to="/reservar"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="mx-4 flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all"
+                  >
+                    Reservar Ahora
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

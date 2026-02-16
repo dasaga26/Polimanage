@@ -129,7 +129,7 @@ func main() {
 	userHandler := userPres.NewUserHandler(userService)
 
 	// Rutas Users
-	userPres.RegisterRoutes(app, userHandler)
+	userPres.RegisterRoutes(app, userHandler, jwtService)
 
 	// ============================================================
 	// MÓDULO 3: FEATURE PROFILE (CtrlProfile: getProfile, follow, unfollow)
@@ -152,7 +152,7 @@ func main() {
 	roleRepo := roleInfra.NewRoleRepository(database.DB)
 	roleService := roleApp.NewRoleService(roleRepo)
 	roleHandler := rolePres.NewRoleHandler(roleService)
-	rolePres.RegisterRoutes(app, roleHandler)
+	rolePres.RegisterRoutes(app, roleHandler, jwtService)
 
 	// ============================================================
 	// OTROS MÓDULOS (Pistas, Bookings, Classes, Clubs, Payments)
@@ -160,7 +160,7 @@ func main() {
 	pistaRepo := infrastructure.NewPistaRepository(database.DB)
 	pistaService := application.NewPistaService(pistaRepo)
 	pistaHandler := presentation.NewPistaHandler(pistaService)
-	presentation.RegisterRoutes(app, pistaHandler)
+	presentation.RegisterRoutes(app, pistaHandler, jwtService)
 
 	// Servicio de disponibilidad compartido (pistas no pueden tener booking Y clase al mismo tiempo)
 	bookingRepo := bookingInfra.NewBookingRepository(database.DB)
@@ -170,7 +170,7 @@ func main() {
 	// Módulo Bookings (Reservas)
 	bookingService := bookingApp.NewBookingService(bookingRepo, database.DB)
 	bookingHandler := bookingPres.NewBookingHandler(bookingService)
-	bookingPres.RegisterRoutes(app, bookingHandler)
+	bookingPres.RegisterRoutes(app, bookingHandler, jwtService)
 
 	// Módulo Classes (Clases Grupales)
 	classService := classApp.NewClassService(classRepo, availabilityService)
@@ -184,8 +184,8 @@ func main() {
 	enrollmentHandler := classPres.NewEnrollmentHandler(enrollmentService)
 
 	// Registrar rutas con enrollmentHandler
-	classPres.RegisterRoutes(app, classHandler, enrollmentHandler)
-	classPres.RegisterEnrollmentRoutes(app.Group("/api/enrollments"), enrollmentHandler)
+	classPres.RegisterRoutes(app, classHandler, enrollmentHandler, jwtService)
+	classPres.RegisterEnrollmentRoutes(app.Group("/api/enrollments"), enrollmentHandler, jwtService)
 
 	// Módulo Clubs (Clubs deportivos y membresías)
 	clubRepo := clubInfra.NewClubRepository(database.DB)
@@ -199,12 +199,12 @@ func main() {
 	paymentRepo := paymentInfra.NewPaymentRepository(database.DB)
 	paymentService := paymentApp.NewPaymentService(paymentRepo, paymentGateway)
 	paymentHandler := paymentPres.NewPaymentHandler(paymentService)
-	paymentPres.RegisterRoutes(app, paymentHandler)
+	paymentPres.RegisterRoutes(app, paymentHandler, jwtService)
 
 	// Servicio de renovación de membresías (integra Clubs + Payments)
 	renewalService := clubApp.NewRenewalService(clubMembershipRepo, clubRepo, paymentService)
 	clubHandler := clubPres.NewClubHandler(clubService, clubMembershipService, renewalService, clubUserProvider)
-	clubPres.RegisterRoutes(app, clubHandler)
+	clubPres.RegisterRoutes(app, clubHandler, jwtService)
 
 	// ============================================================
 	// RUTAS PROTEGIDAS CON JWT MIDDLEWARE

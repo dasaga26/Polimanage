@@ -1,10 +1,20 @@
 package presentation
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"backend-go/shared/middleware"
+	"backend-go/shared/security"
 
-func RegisterRoutes(app *fiber.App, handler *RoleHandler) {
-	api := app.Group("/api")
-	roles := api.Group("/roles")
+	"github.com/gofiber/fiber/v2"
+)
 
-	roles.Get("/", handler.GetAllRoles)
+// ======================================================================================
+// ROLE ROUTES - Solo ADMIN puede gestionar roles
+// ======================================================================================
+
+func RegisterRoutes(app *fiber.App, handler *RoleHandler, jwtService security.JWTService) {
+	roles := app.Group("/api/roles")
+	roles.Use(middleware.JWTMiddleware(jwtService))
+	roles.Use(middleware.RequireRoleByName("ADMIN", "GESTOR"))
+
+	roles.Get("/", handler.GetAllRoles) // Listar roles - Solo ADMIN
 }

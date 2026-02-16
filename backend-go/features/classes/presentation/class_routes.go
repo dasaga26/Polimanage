@@ -1,23 +1,38 @@
 package presentation
 
 import (
+	"backend-go/shared/middleware"
+	"backend-go/shared/security"
+
 	"github.com/gofiber/fiber/v2"
 )
 
-func RegisterRoutes(app *fiber.App, handler *ClassHandler, enrollmentHandler *EnrollmentHandler) {
-	api := app.Group("/api")
-	classes := api.Group("/classes")
+// ======================================================================================
+// CLASS ROUTES
+// Público: GET / (listar clases), GET /:slug, GET /instructor/:instructorId
+// Admin: POST /, PUT /:slug, DELETE /:slug, POST /:slug/cancel
+// Autenticado: POST /:slug/enroll
+// ======================================================================================
 
-	// Rutas de gestión de clases
-	classes.Get("/", handler.GetAll)                                  // GET /api/classes
-	classes.Get("/:slug", handler.GetByID)                            // GET /api/classes/:slug
-	classes.Get("/instructor/:instructorId", handler.GetByInstructor) // GET /api/classes/instructor/:instructorId
-	classes.Post("/", handler.Create)                                 // POST /api/classes
-	classes.Put("/:slug", handler.Update)                             // PUT /api/classes/:slug
-	classes.Delete("/:slug", handler.Delete)                          // DELETE /api/classes/:slug
-	classes.Post("/:slug/cancel", handler.Cancel)                     // POST /api/classes/:slug/cancel
+func RegisterRoutes(app *fiber.App, handler *ClassHandler, enrollmentHandler *EnrollmentHandler, jwtService security.JWTService) {
+	// Rutas públicas - Ver clases
+	public := app.Group("/api/classes")
+	public.Get("/", handler.GetAll)                                  // Listar clases - Público
+	public.Get("/:slug", handler.GetByID)                            // Ver clase por slug - Público
+	public.Get("/instructor/:instructorId", handler.GetByInstructor) // Clases por instructor - Público
 
-	// Rutas de inscripciones - delegadas al módulo de enrollments
-	classes.Get("/:slug/enrollments", handler.GetEnrollments) // GET /api/classes/:slug/enrollments
-	classes.Post("/:slug/enroll", enrollmentHandler.Enroll)   // POST /api/classes/:slug/enroll
+	// Rutas protegidas - Solo ADMIN, GESTOR y MONITOR (gestión de clases)
+	admin := app.Group("/api/classes")
+	admin.Use(middleware.JWTMiddleware(jwtService))
+	admin.Use(middleware.RequireRoleByName("ADMIN", "GESTOR", "MONITOR"))
+	admin.Post("/", handler.Create)                         // Crear clase - Solo ADMIN
+	admin.Put("/:slug", handler.Update)                     // Actualizar clase - Solo ADMIN
+	admin.Delete("/:slug", handler.Delete)                  // Eliminar clase - Solo ADMIN
+	admin.Post("/:slug/cancel", handler.Cancel)             // Cancelar clase - Solo ADMIN
+	admin.Get("/:slug/enrollments", handler.GetEnrollments) // Ver inscripciones - Solo ADMIN
+
+	// Rutas protegidas - Autenticado (inscripciones)
+	protected := app.Group("/api/classes")
+	protected.Use(middleware.JWTMiddleware(jwtService))
+	protected.Post("/:slug/enroll", enrollmentHandler.Enroll) // Inscribirse - Autenticado
 }

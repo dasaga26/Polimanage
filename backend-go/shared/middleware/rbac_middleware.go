@@ -38,7 +38,7 @@ func RequireRole(allowedRoles ...uint) fiber.Handler {
 // RequireRoleByName middleware que requiere un rol específico por nombre
 func RequireRoleByName(allowedRoles ...string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		roleName, ok := c.Locals("user_role_name").(string)
+		roleName, ok := c.Locals("roleName").(string)
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "No autenticado",

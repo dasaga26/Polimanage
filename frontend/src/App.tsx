@@ -2,9 +2,14 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { DashboardLayout } from './components/admin/DashboardLayout';
+import { AdminRoute } from './components/auth/AdminRoute';
+import { ClientRoute } from './components/auth/ClientRoute';
 import Home from './pages/home/Home';
 import ShopPage from './pages/shop/ShopPage';
 import PublicClassesPage from './pages/classes/ClassesPage';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import ProfilePage from './pages/profile/ProfilePage';
 import Dashboard from './pages/admin/Dashboard';
 import UsersPage from './pages/admin/UsersPage';
 import PistasPage from './pages/admin/PistasPage';
@@ -31,42 +36,64 @@ function App() {
           }
         />
 
-        {/* Shop/Reservas */}
+        {/* Shop/Reservas - Solo clientes */}
         <Route
           path="/reservar"
           element={
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <main className="flex-1">
-                <ShopPage />
-              </main>
-              <Footer />
-            </div>
+            <ClientRoute>
+              <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-1">
+                  <ShopPage />
+                </main>
+                <Footer />
+              </div>
+            </ClientRoute>
           }
         />
 
-        {/* Clases públicas */}
+        {/* Clases públicas - Solo clientes */}
         <Route
           path="/clases"
           element={
+            <ClientRoute>
+              <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-1">
+                  <PublicClassesPage />
+                </main>
+                <Footer />
+              </div>
+            </ClientRoute>
+          }
+        />
+
+        {/* Auth Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Profile Route - Ejemplo React Query */}
+        <Route
+          path="/profile/:username"
+          element={
             <div className="min-h-screen flex flex-col">
               <Navbar />
-              <main className="flex-1">
-                <PublicClassesPage />
+              <main className="flex-1 container mx-auto px-4 py-8">
+                <ProfilePage />
               </main>
               <Footer />
             </div>
           }
         />
 
-        {/* Admin Routes - Solo MVP */}
-        <Route path="/admin" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
-        <Route path="/admin/bookings" element={<DashboardLayout><BookingsPage /></DashboardLayout>} />
-        <Route path="/admin/pistas" element={<DashboardLayout><PistasPage /></DashboardLayout>} />
-        <Route path="/admin/users" element={<DashboardLayout><UsersPage /></DashboardLayout>} />
-        <Route path="/admin/classes" element={<DashboardLayout><AdminClassesPage /></DashboardLayout>} />
-        <Route path="/admin/clubs" element={<DashboardLayout><ClubsPage /></DashboardLayout>} />
-        <Route path="/admin/subscriptions" element={<DashboardLayout><SubscriptionsPage /></DashboardLayout>} />
+        {/* Admin Routes - Solo ADMIN puede acceder */}
+        <Route path="/admin" element={<AdminRoute><DashboardLayout><Dashboard /></DashboardLayout></AdminRoute>} />
+        <Route path="/admin/bookings" element={<AdminRoute><DashboardLayout><BookingsPage /></DashboardLayout></AdminRoute>} />
+        <Route path="/admin/pistas" element={<AdminRoute><DashboardLayout><PistasPage /></DashboardLayout></AdminRoute>} />
+        <Route path="/admin/users" element={<AdminRoute><DashboardLayout><UsersPage /></DashboardLayout></AdminRoute>} />
+        <Route path="/admin/classes" element={<AdminRoute><DashboardLayout><AdminClassesPage /></DashboardLayout></AdminRoute>} />
+        <Route path="/admin/clubs" element={<AdminRoute><DashboardLayout><ClubsPage /></DashboardLayout></AdminRoute>} />
+        <Route path="/admin/subscriptions" element={<AdminRoute><DashboardLayout><SubscriptionsPage /></DashboardLayout></AdminRoute>} />
       </Routes>
     </BrowserRouter>
   );

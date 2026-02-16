@@ -20,6 +20,39 @@ export const apiPython = axios.create({
   },
 });
 
+// ============================================================
+// INTERCEPTOR JWT - Añadir token automáticamente
+// ============================================================
+const TOKEN_KEY = 'polimanage_token';
+
+// Interceptor para apiGo (backend principal)
+apiGo.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para apiPython (backend legacy)
+apiPython.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Por defecto, usa el backend Go para nuevas funcionalidades
 export const api = apiGo;
 
