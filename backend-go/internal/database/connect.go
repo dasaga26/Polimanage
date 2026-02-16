@@ -2,6 +2,7 @@ package database
 
 import (
 	"backend-go/shared/database"
+	"backend-go/shared/security"
 	"fmt"
 	"log"
 	"os"
@@ -212,13 +213,19 @@ func seedDemoData() {
 
 	log.Println("🎭 Insertando datos de demostración...")
 
+	// Crear servicio de encriptación Argon2id
+	cryptoService := security.NewArgon2CryptoService()
+	
+	// Hashear contraseña "admin123"
+	adminHash, _ := cryptoService.HashPassword("admin123")
+
 	// Usuario admin de prueba
 	phone1 := "+34600000001"
 	adminUser := database.User{
 		RoleID:       1,
 		Slug:         "admin-demo",
 		Email:        "admin@polimanage.com",
-		PasswordHash: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password
+		PasswordHash: adminHash, // admin123 con Argon2id
 		FullName:     "Admin Demo",
 		Phone:        &phone1,
 		IsActive:     true,
@@ -227,11 +234,12 @@ func seedDemoData() {
 
 	// Usuario cliente de prueba
 	phone2 := "+34600000002"
+	clienteHash, _ := cryptoService.HashPassword("cliente123")
 	clientUser := database.User{
 		RoleID:       5,
 		Slug:         "cliente-demo",
 		Email:        "cliente@polimanage.com",
-		PasswordHash: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password
+		PasswordHash: clienteHash, // cliente123 con Argon2id
 		FullName:     "Cliente Demo",
 		Phone:        &phone2,
 		IsActive:     true,

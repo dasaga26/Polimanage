@@ -52,6 +52,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: 1234
       DB_NAME: polimanage
+      JWT_SECRET: polimanage-super-secret-key-change-in-production-2026
       PORT: 8080
     ports:
       - "8080:8080"

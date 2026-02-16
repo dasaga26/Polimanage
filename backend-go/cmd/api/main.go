@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"time"
 
 	// Feature AUTH (register, login, logout)
@@ -92,7 +93,13 @@ func main() {
 	// SHARED SECURITY SERVICES (Argon2, JWT)
 	// ============================================================
 	cryptoService := security.NewArgon2CryptoService()
-	jwtService := security.NewJWTService("your-secret-key-change-this-in-production") // TODO: Mover a .env
+	
+	// Leer JWT secret desde variable de entorno
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("❌ JWT_SECRET no está configurado en las variables de entorno")
+	}
+	jwtService := security.NewJWTService(jwtSecret)
 	
 	// ============================================================
 	// MÓDULO 1: FEATURE AUTH (CtrlAuth: register, login, logout)
