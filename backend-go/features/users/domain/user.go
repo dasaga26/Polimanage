@@ -19,6 +19,7 @@ type User struct {
 	PasswordHash     string
 	FullName         string
 	Phone            *string
+	DNI              *string
 	AvatarURL        *string
 	StripeCustomerID *string
 	IsMember         bool

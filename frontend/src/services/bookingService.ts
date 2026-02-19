@@ -5,7 +5,7 @@ export type PaymentStatus = 'UNPAID' | 'PAID' | 'REFUNDED';
 
 export interface Booking {
   id: number;
-  userId: number;
+  userId: string; // UUID
   userName: string;
   pistaId: number;
   pistaName: string;
@@ -22,7 +22,7 @@ export interface Booking {
 }
 
 export interface CreateBookingData {
-  userId?: number;
+  userId?: string; // UUID opcional
   pistaId: number;
   startTime: string;
   endTime: string;

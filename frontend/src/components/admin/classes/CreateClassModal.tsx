@@ -51,7 +51,7 @@ export function CreateClassModal({
 
   const [formData, setFormData] = useState<CreateClassDTO>({
     title: '',
-    instructorId: 0,
+    instructorId: '',
     pistaId: prefill?.pistaId || 0,
     maxCapacity: 10,
     priceCents: 0,
@@ -78,7 +78,7 @@ export function CreateClassModal({
       newErrors.title = 'El título debe tener al menos 3 caracteres';
     }
 
-    if (formData.instructorId === 0) {
+    if (!formData.instructorId || formData.instructorId === '') {
       newErrors.instructorId = 'Debes seleccionar un monitor';
     }
 
@@ -141,7 +141,7 @@ export function CreateClassModal({
         // Modo Creación (Reset)
         setFormData({
           title: '',
-          instructorId: 0,
+          instructorId: '',
           pistaId: prefill?.pistaId || 0,
           maxCapacity: 10,
           priceCents: 0,
@@ -244,9 +244,9 @@ export function CreateClassModal({
             <div>
               <Label htmlFor="instructor">Monitor *</Label>
               <Select
-                value={formData.instructorId.toString()}
+                value={formData.instructorId === '' ? undefined : formData.instructorId}
                 onValueChange={(value: string) => {
-                  setFormData({ ...formData, instructorId: Number(value) });
+                  setFormData({ ...formData, instructorId: value });
                   if (errors.instructorId) {
                     setErrors({ ...errors, instructorId: '' });
                   }

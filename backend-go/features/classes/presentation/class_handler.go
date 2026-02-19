@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type ClassHandler struct {
@@ -98,6 +99,12 @@ func (h *ClassHandler) Create(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "Datos inválidos"})
 	}
 
+	// Parsear instructorId de string a UUID
+	instructorID, err := uuid.Parse(req.InstructorID)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "InstructorID inválido"})
+	}
+
 	// TEMPORAL: Asumimos que el usuario actual es ADMIN (role_id = 1)
 	// En producción, esto vendría del token JWT
 	userRoleID := 1
@@ -105,7 +112,7 @@ func (h *ClassHandler) Create(c *fiber.Ctx) error {
 	// Mapear Request -> Domain Entity
 	class := &domain.Class{
 		PistaID:      req.PistaID,
-		InstructorID: req.InstructorID,
+		InstructorID: instructorID,
 		Title:        req.Title,
 		Description:  req.Description,
 		StartTime:    req.StartTime.UTC(),
@@ -141,6 +148,12 @@ func (h *ClassHandler) Update(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "Datos inválidos"})
 	}
 
+	// Parsear instructorId de string a UUID
+	instructorID, err := uuid.Parse(req.InstructorID)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "InstructorID inválido"})
+	}
+
 	// Obtener clase existente
 	existingClass, err := h.service.GetClassBySlug(slug)
 	if err != nil {
@@ -149,7 +162,7 @@ func (h *ClassHandler) Update(c *fiber.Ctx) error {
 
 	// Actualizar campos
 	existingClass.PistaID = req.PistaID
-	existingClass.InstructorID = req.InstructorID
+	existingClass.InstructorID = instructorID
 	existingClass.Title = req.Title
 	existingClass.Description = req.Description
 	existingClass.StartTime = req.StartTime.UTC()
@@ -248,7 +261,7 @@ func ToResponse(class *domain.Class) ClassResponse {
 		Slug:           class.Slug,
 		PistaID:        class.PistaID,
 		PistaName:      class.PistaName,
-		InstructorID:   class.InstructorID,
+		InstructorID:   class.InstructorID.String(), // Convertir UUID a string
 		InstructorName: class.InstructorName,
 		Title:          class.Title,
 		Description:    class.Description,

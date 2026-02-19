@@ -21,7 +21,9 @@ func RegisterRoutes(app *fiber.App, handler *UserHandler, jwtService security.JW
 	admin := app.Group("/api/users")
 	admin.Use(middleware.JWTMiddleware(jwtService))
 	admin.Use(middleware.RequireRoleByName("ADMIN", "GESTOR"))
-	admin.Get("", handler.GetAll) // Listar todos los usuarios - Solo ADMIN/GESTOR
+	admin.Get("", handler.GetAll)                // Listar todos los usuarios - Solo ADMIN/GESTOR
+	admin.Post("", handler.Create)               // Crear usuario - Solo ADMIN/GESTOR
+	admin.Delete("/:slug", handler.DeleteBySlug) // Eliminar usuario por slug - Solo ADMIN/GESTOR
 
 	// Rutas protegidas - Autenticado (update)
 	protected := app.Group("/api/users")

@@ -27,6 +27,7 @@ type User struct {
 	PasswordHash     string         `gorm:"type:varchar(255);not null"`
 	FullName         string         `gorm:"type:varchar(100);not null"`
 	Phone            *string        `gorm:"type:varchar(20)"`
+	DNI              *string        `gorm:"type:varchar(20)"`
 	AvatarURL        *string        `gorm:"type:text"`
 	StripeCustomerID *string        `gorm:"type:varchar(255)"`
 	IsMember         bool           `gorm:"default:false"`
@@ -120,7 +121,7 @@ type Class struct {
 	ID           uint           `gorm:"primaryKey"`
 	Slug         string         `gorm:"type:varchar(120);uniqueIndex"`
 	PistaID      uint           `gorm:"not null"`
-	InstructorID uint           `gorm:"not null"`
+	InstructorID uuid.UUID      `gorm:"type:uuid;not null"`
 	Title        string         `gorm:"type:varchar(100);not null"`
 	Description  *string        `gorm:"type:text"`
 	StartTime    time.Time      `gorm:"type:timestamptz;not null"`

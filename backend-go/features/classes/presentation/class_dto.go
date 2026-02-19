@@ -5,7 +5,7 @@ import "time"
 // CreateClassRequest representa los datos para crear una clase
 type CreateClassRequest struct {
 	PistaID      int       `json:"pistaId" validate:"required"`
-	InstructorID int       `json:"instructorId" validate:"required"`
+	InstructorID string    `json:"instructorId" validate:"required"` // UUID como string
 	Title        string    `json:"title" validate:"required,min=3"`
 	Description  *string   `json:"description"`
 	StartTime    time.Time `json:"startTime" validate:"required"`
@@ -17,7 +17,7 @@ type CreateClassRequest struct {
 // UpdateClassRequest representa los datos para actualizar una clase
 type UpdateClassRequest struct {
 	PistaID      int       `json:"pistaId" validate:"required"`
-	InstructorID int       `json:"instructorId" validate:"required"`
+	InstructorID string    `json:"instructorId" validate:"required"` // UUID como string
 	Title        string    `json:"title" validate:"required,min=3"`
 	Description  *string   `json:"description"`
 	StartTime    time.Time `json:"startTime" validate:"required"`
@@ -33,7 +33,7 @@ type ClassResponse struct {
 	Slug           string               `json:"slug"`
 	PistaID        int                  `json:"pistaId"`
 	PistaName      string               `json:"pistaName"`
-	InstructorID   int                  `json:"instructorId"`
+	InstructorID   string               `json:"instructorId"` // UUID como string
 	InstructorName string               `json:"instructorName"`
 	Title          string               `json:"title"`
 	Description    *string              `json:"description"`

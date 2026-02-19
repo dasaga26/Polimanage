@@ -3,7 +3,7 @@
 // Booking types
 export interface Booking {
   id: number;
-  userId: number;
+  userId: string; // UUID
   userName: string;
   pistaId: number;
   pistaName: string;
@@ -16,7 +16,7 @@ export interface Booking {
   paymentStatus: 'UNPAID' | 'PAID' | 'REFUNDED';
   notes?: string;
   user?: {
-    id: number;
+    id: string; // UUID
     fullName: string;
     email: string;
   };
@@ -31,7 +31,7 @@ export interface Booking {
 // Payment types
 export interface Payment {
   id: number;
-  userId: number;
+  userId: string; // UUID
   amountCents: number;
   status: 'SUCCEEDED' | 'PENDING' | 'FAILED';
   provider: string;
@@ -40,7 +40,7 @@ export interface Payment {
   tournamentId?: number | null;
   subscriptionId?: number | null;
   user?: {
-    id: number;
+    id: string; // UUID
     fullName: string;
   };
   createdAt?: string;
@@ -60,7 +60,7 @@ export interface Class {
   id: number;
   title?: string;
   name: string;
-  instructorId: number;
+  instructorId: string; // UUID
   pistaId: number;
   maxCapacity?: number;
   capacity?: number;
@@ -70,7 +70,7 @@ export interface Class {
   status?: 'OPEN' | 'FULL' | 'CANCELLED' | 'COMPLETED';
   isActive: boolean;
   instructor?: {
-    id: number;
+    id: string; // UUID
     fullName: string;
   };
   pista?: {
@@ -84,15 +84,15 @@ export interface Team {
   id: number;
   name: string;
   slug: string;
-  creatorId?: number;
-  captainId?: number;
+  creatorId?: string; // UUID
+  captainId?: string; // UUID
   maxMembers: number;
   logoUrl?: string;
   description?: string;
   level?: string;
   isActive: boolean;
   captain?: {
-    id: number;
+    id: string; // UUID
     fullName: string;
   };
 }
@@ -102,7 +102,7 @@ export interface Tournament {
   id: number;
   name: string;
   slug: string;
-  organizerId: number;
+  organizerId: string; // UUID
   pistaId: number;
   startDate: string;
   endDate: string;
@@ -117,14 +117,14 @@ export interface Tournament {
 export interface Subscription {
   id: number;
   user?: {
-    id: number;
+    id: string; // UUID
     fullName: string;
   };
   plan?: {
     id: number;
     name: string;
   };
-  userId: number;
+  userId: string; // UUID
   planId: number;
   status: 'ACTIVE' | 'CANCELED' | 'EXPIRED';
   startDate: string;

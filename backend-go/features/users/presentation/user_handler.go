@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 // ======================================================================================
@@ -121,4 +122,91 @@ func (h *UserHandler) Update(c *fiber.Ctx) error {
 
 	// serializer_user
 	return c.JSON(ToUserResponse(updated))
+}
+
+// Create maneja POST /users (crear usuario)
+// @Summary Crear un nuevo usuario
+// @Tags users
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param user body CreateUserRequest true "Datos del usuario"
+// @Success 201 {object} UserResponse
+// @Router /api/users [post]
+func (h *UserHandler) Create(c *fiber.Ctx) error {
+	var req CreateUserRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Mapear request a dominio
+	user := RequestToDomain(&req)
+
+	if err := h.service.Create(user); err != nil {
+		if errors.Is(err, domain.ErrUserAlreadyExists) {
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// serializer_user
+	return c.Status(fiber.StatusCreated).JSON(ToUserResponse(user))
+}
+
+// Delete maneja DELETE /users/:id (eliminar usuario)
+// @Summary Eliminar un usuario
+// @Tags users
+// @Security BearerAuth
+// @Param id path string true "ID del usuario"
+// @Success 204
+// @Router /api/users/{id} [delete]
+func (h *UserHandler) Delete(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+	if idParam == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID inválido"})
+	}
+
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID inválido"})
+	}
+
+	if err := h.service.Delete(id); err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
+}
+
+// DeleteBySlug maneja DELETE /users/:slug (eliminar usuario por slug)
+// @Summary Eliminar un usuario por slug
+// @Tags users
+// @Security BearerAuth
+// @Param slug path string true "Slug del usuario"
+// @Success 204
+// @Router /api/users/{slug} [delete]
+func (h *UserHandler) DeleteBySlug(c *fiber.Ctx) error {
+	slug := c.Params("slug")
+	if slug == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Slug inválido"})
+	}
+
+	// Obtener usuario por slug para conseguir el ID
+	user, err := h.service.GetBySlug(slug)
+	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Eliminar por ID
+	if err := h.service.Delete(user.ID); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
 }

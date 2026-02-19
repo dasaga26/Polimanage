@@ -82,7 +82,7 @@ export function CreateBookingModal({
         const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
 
         const data: CreateBookingData = {
-            userId: userId ? parseInt(userId) : undefined, // Optional for admin if we want system user
+            userId: userId || undefined, // UUID string or undefined
             pistaId: parseInt(pistaId),
             startTime: startDateTime.toISOString(),
             endTime: endDateTime.toISOString(),

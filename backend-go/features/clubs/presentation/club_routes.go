@@ -15,28 +15,25 @@ import (
 // ======================================================================================
 
 func RegisterRoutes(app *fiber.App, handler *ClubHandler, jwtService security.JWTService) {
-	// Rutas públicas - Ver clubs
-	public := app.Group("/api/clubs")
-	public.Get("/", handler.GetAll)                  // Listar clubs - Público
-	public.Get("/:slug", handler.GetBySlug)          // Ver club - Público
-	public.Get("/:slug/members", handler.GetMembers) // Ver miembros - Público
+	// Grupo base
+	clubs := app.Group("/api/clubs")
+
+	// Rutas públicas - Ver clubs (sin middleware)
+	clubs.Get("/", handler.GetAll)
+	clubs.Get("/:slug", handler.GetBySlug)
+	clubs.Get("/:slug/members", handler.GetMembers)
 
 	// Rutas protegidas - Solo ADMIN, GESTOR y CLUB (gestión de clubs)
-	admin := app.Group("/api/clubs")
-	admin.Use(middleware.JWTMiddleware(jwtService))
-	admin.Use(middleware.RequireRoleByName("ADMIN", "GESTOR", "CLUB"))
-	admin.Post("/", handler.Create)                 // Crear club - Solo ADMIN
-	admin.Put("/:slug", handler.Update)             // Actualizar club - Solo ADMIN
-	admin.Delete("/:slug", handler.Delete)          // Eliminar club - Solo ADMIN
-	admin.Post("/:slug/members", handler.AddMember) // Añadir miembro - Solo ADMIN
+	clubs.Post("/", middleware.JWTMiddleware(jwtService), middleware.RequireRoleByName("ADMIN", "GESTOR", "CLUB"), handler.Create)
+	clubs.Put("/:slug", middleware.JWTMiddleware(jwtService), middleware.RequireRoleByName("ADMIN", "GESTOR", "CLUB"), handler.Update)
+	clubs.Delete("/:slug", middleware.JWTMiddleware(jwtService), middleware.RequireRoleByName("ADMIN", "GESTOR", "CLUB"), handler.Delete)
+	clubs.Post("/:slug/members", middleware.JWTMiddleware(jwtService), middleware.RequireRoleByName("ADMIN", "GESTOR", "CLUB"), handler.AddMember)
 
 	// Rutas protegidas - Autenticado (membresías)
-	protected := app.Group("/api/clubs")
-	protected.Use(middleware.JWTMiddleware(jwtService))
-	protected.Delete("/memberships/:id", handler.RemoveMember)                // Eliminar membresía - Validar en handler
-	protected.Post("/memberships/:id/renew", handler.RenewMembership)         // Renovar - Validar en handler
-	protected.Post("/memberships/:id/suspend", handler.SuspendMembership)     // Suspender - Validar en handler
-	protected.Post("/memberships/:id/resume", handler.ResumeMembership)       // Reanudar - Validar en handler
-	protected.Post("/memberships/:id/cancel", handler.CancelMembership)       // Cancelar - Validar en handler
-	protected.Put("/memberships/:id/billing-date", handler.UpdateBillingDate) // Actualizar billing - Validar en handler
+	clubs.Delete("/memberships/:id", middleware.JWTMiddleware(jwtService), handler.RemoveMember)
+	clubs.Post("/memberships/:id/renew", middleware.JWTMiddleware(jwtService), handler.RenewMembership)
+	clubs.Post("/memberships/:id/suspend", middleware.JWTMiddleware(jwtService), handler.SuspendMembership)
+	clubs.Post("/memberships/:id/resume", middleware.JWTMiddleware(jwtService), handler.ResumeMembership)
+	clubs.Post("/memberships/:id/cancel", middleware.JWTMiddleware(jwtService), handler.CancelMembership)
+	clubs.Put("/memberships/:id/billing-date", middleware.JWTMiddleware(jwtService), handler.UpdateBillingDate)
 }

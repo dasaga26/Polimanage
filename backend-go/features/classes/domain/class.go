@@ -11,7 +11,7 @@ type Class struct {
 	ID           int
 	Slug         string
 	PistaID      int
-	InstructorID int
+	InstructorID uuid.UUID
 	Title        string
 	Description  *string
 	StartTime    time.Time

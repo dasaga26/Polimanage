@@ -1,17 +1,23 @@
 package presentation
 
 import (
+	"backend-go/shared/middleware"
+	"backend-go/shared/security"
+
 	"github.com/gofiber/fiber/v2"
 )
 
 // ======================================================================================
 // PROFILE ROUTES
-// CtrlProfile: getProfile
 // ======================================================================================
 
-func RegisterProfileRoutes(app *fiber.App, handler *ProfileHandler) {
-	profiles := app.Group("/api/profiles")
+func RegisterProfileRoutes(app *fiber.App, handler *ProfileHandler, jwtService security.JWTService) {
+	// Grupo protegido con JWT middleware
+	profile := app.Group("/api/profile")
+	profile.Use(middleware.JWTMiddleware(jwtService))
 
-	// Rutas públicas
-	profiles.Get("/:username", handler.GetProfile)
+	// Rutas del perfil del usuario autenticado
+	profile.Get("/me", handler.GetMyProfile)
+	profile.Put("/me", handler.UpdateMyProfile)
+	profile.Post("/change-password", handler.ChangePassword)
 }

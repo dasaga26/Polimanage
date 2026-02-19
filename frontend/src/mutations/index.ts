@@ -9,6 +9,3 @@ export { useDeletePista } from './pistas/useDeletePista';
 
 export { useDeleteBooking } from './bookings/useDeleteBooking';
 export { useDeleteClass } from './classes/useDeleteClass';
-export { useDeleteTeam } from './teams/useDeleteTeam';
-export { useDeleteTournament } from './tournaments/useDeleteTournament';
-export { useUpdateOpeningHour } from './openingHours/useUpdateOpeningHour';

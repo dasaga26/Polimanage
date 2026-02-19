@@ -4,6 +4,7 @@ import (
 	"backend-go/features/users/domain"
 	"backend-go/shared/security"
 	"errors"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -43,6 +44,53 @@ func (s *UserService) GetByID(id uuid.UUID) (*domain.User, error) {
 // GetBySlug obtiene un usuario por slug (getUser)
 func (s *UserService) GetBySlug(slug string) (*domain.User, error) {
 	return s.repo.GetBySlug(slug)
+}
+
+// Create crea un nuevo usuario
+func (s *UserService) Create(user *domain.User) error {
+	// Validar email
+	if user.Email == "" {
+		return errors.New("email es requerido")
+	}
+
+	// Verificar si el email ya existe
+	exists, err := s.repo.EmailExists(user.Email)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return domain.ErrUserAlreadyExists
+	}
+
+	// Validar contraseña
+	if len(user.PasswordHash) < 8 {
+		return errors.New("contraseña debe tener al menos 8 caracteres")
+	}
+
+	// Hashear contraseña
+	hashedPassword, err := s.crypto.HashPassword(user.PasswordHash)
+	if err != nil {
+		return err
+	}
+	user.PasswordHash = hashedPassword
+
+	// Generar UUID y slug si no están establecidos
+	if user.ID == uuid.Nil {
+		user.ID = uuid.New()
+	}
+	if user.Slug == "" {
+		user.Slug = generateSlug(user.Email)
+	}
+
+	// RoleID por defecto: CLIENTE (5)
+	if user.RoleID == 0 {
+		user.RoleID = 5
+	}
+
+	// IsActive por defecto: true
+	user.IsActive = true
+
+	return s.repo.Create(user)
 }
 
 // UpdateBySlug actualiza un usuario por slug (update)
@@ -119,4 +167,16 @@ func (s *UserService) UpdatePassword(userID uuid.UUID, newPassword string) error
 	user.PasswordHash = hashedPassword
 
 	return s.repo.Update(user)
+}
+
+// generateSlug genera un slug único a partir del email
+func generateSlug(email string) string {
+	parts := strings.Split(email, "@")
+	if len(parts) > 0 {
+		slug := strings.ToLower(parts[0])
+		slug = strings.ReplaceAll(slug, ".", "")
+		slug = strings.ReplaceAll(slug, "_", "")
+		return slug
+	}
+	return "user"
 }

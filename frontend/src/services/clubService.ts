@@ -1,4 +1,4 @@
-import { apiGo } from '@/config/axios';
+import { apiGo } from './api';
 import type { Club, CreateClubData, UpdateClubData, ClubMembership } from '@/types/clubTypes';
 
 export const clubService = {

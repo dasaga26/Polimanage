@@ -8,6 +8,10 @@ import "errors"
 
 // Errores de perfil
 var (
-	ErrProfileNotFound = errors.New("perfil no encontrado")
-	ErrInvalidUsername = errors.New("nombre de usuario inválido")
+	ErrProfileNotFound      = errors.New("perfil no encontrado")
+	ErrInvalidUserID        = errors.New("ID de usuario inválido")
+	ErrInvalidPassword      = errors.New("contraseña actual incorrecta")
+	ErrWeakPassword         = errors.New("la contraseña debe tener al menos 8 caracteres")
+	ErrUpdateFailed         = errors.New("error al actualizar el perfil")
+	ErrPasswordChangeFailed = errors.New("error al cambiar la contraseña")
 )

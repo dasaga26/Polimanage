@@ -9,7 +9,7 @@ import ShopPage from './pages/shop/ShopPage';
 import PublicClassesPage from './pages/classes/ClassesPage';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import ProfilePage from './pages/profile/ProfilePage';
+import MyProfilePage from './pages/profile/MyProfilePage';
 import Dashboard from './pages/admin/Dashboard';
 import UsersPage from './pages/admin/UsersPage';
 import PistasPage from './pages/admin/PistasPage';
@@ -72,17 +72,19 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Profile Route - Ejemplo React Query */}
+        {/* My Profile - Usuario autenticado */}
         <Route
-          path="/profile/:username"
+          path="/mi-perfil"
           element={
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <main className="flex-1 container mx-auto px-4 py-8">
-                <ProfilePage />
-              </main>
-              <Footer />
-            </div>
+            <ClientRoute>
+              <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-1">
+                  <MyProfilePage />
+                </main>
+                <Footer />
+              </div>
+            </ClientRoute>
           }
         />
 

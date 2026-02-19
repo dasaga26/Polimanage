@@ -1,22 +1,45 @@
 // ============================================================
-// PROFILE SERVICE - API calls para perfiles públicos
+// PROFILE SERVICE - API calls para perfil del usuario autenticado
 // ============================================================
 
 import { apiGo } from './api';
-
-export interface PublicProfile {
-  username: string;
-  fullName: string;
-  avatarUrl: string;
-  bio: string;
-}
+import type { UserProfile, UpdateProfileData, ChangePasswordData } from '../types/profileTypes';
 
 export const profileService = {
   /**
-   * Get Profile - Obtener perfil público por username
+   * Get My Profile - Obtener perfil del usuario autenticado
    */
-  getByUsername: async (username: string): Promise<PublicProfile> => {
-    const { data } = await apiGo.get<PublicProfile>(`/profiles/${username}`);
+  getMyProfile: async (): Promise<UserProfile> => {
+    const { data } = await apiGo.get<UserProfile>('/profile/me');
+    return data;
+  },
+
+  /**
+   * Update Profile - Actualizar información del perfil
+   */
+  updateProfile: async (profileData: UpdateProfileData): Promise<UserProfile> => {
+    const { data } = await apiGo.put<UserProfile>('/profile/me', profileData);
+    return data;
+  },
+
+  /**
+   * Change Password - Cambiar contraseña del usuario
+   */
+  changePassword: async (passwordData: ChangePasswordData): Promise<void> => {
+    await apiGo.post('/profile/change-password', passwordData);
+  },
+
+  /**
+   * Upload Avatar - Subir foto de perfil
+   */
+  uploadAvatar: async (file: File): Promise<{ avatarUrl: string }> => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    const { data } = await apiGo.post<{ avatarUrl: string }>('/profile/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return data;
   },
 };

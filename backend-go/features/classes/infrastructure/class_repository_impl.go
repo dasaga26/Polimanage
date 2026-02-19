@@ -246,7 +246,7 @@ func ToEntity(model *database.Class) *domain.Class {
 		ID:           int(model.ID),
 		Slug:         model.Slug,
 		PistaID:      int(model.PistaID),
-		InstructorID: int(model.InstructorID),
+		InstructorID: model.InstructorID,
 		Title:        model.Title,
 		Description:  model.Description,
 		StartTime:    model.StartTime,
@@ -283,7 +283,7 @@ func FromEntity(class *domain.Class) *database.Class {
 	model := &database.Class{
 		ID:           uint(class.ID),
 		PistaID:      uint(class.PistaID),
-		InstructorID: uint(class.InstructorID),
+		InstructorID: class.InstructorID,
 		Title:        class.Title,
 		Description:  class.Description,
 		StartTime:    class.StartTime,

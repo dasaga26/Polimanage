@@ -9,29 +9,26 @@ import (
 
 // ======================================================================================
 // BOOKING ROUTES
-// Admin: GET / (todas las reservas)
+// Admin: GET / (todas las reservas), GET /:id
 // Autenticado: POST / (crear), PUT /:id (modificar), DELETE /:id, POST /:id/cancel
 // Público: GET /pista/:pistaId/date/:date (ver disponibilidad)
 // ======================================================================================
 
 // RegisterRoutes registra las rutas del módulo de bookings
 func RegisterRoutes(app *fiber.App, handler *BookingHandler, jwtService security.JWTService) {
-	// Rutas públicas - Ver disponibilidad
-	public := app.Group("/api/bookings")
-	public.Get("/pista/:pistaId/date/:date", handler.GetByPistaAndDate) // Ver reservas por pista/fecha - Público
+	// Grupo base
+	bookings := app.Group("/api/bookings")
 
-	// Rutas protegidas - Solo ADMIN y GESTOR (ver todas las reservas)
-	admin := app.Group("/api/bookings")
-	admin.Use(middleware.JWTMiddleware(jwtService))
-	admin.Use(middleware.RequireRoleByName("ADMIN", "GESTOR"))
-	admin.Get("/", handler.GetAll)     // Todas las reservas - Solo ADMIN
-	admin.Get("/:id", handler.GetByID) // Ver reserva específica - Solo ADMIN
+	// Rutas públicas - Ver disponibilidad (sin middleware)
+	bookings.Get("/pista/:pistaId/date/:date", handler.GetByPistaAndDate)
 
-	// Rutas protegidas - Autenticado (gestionar reservas)
-	protected := app.Group("/api/bookings")
-	protected.Use(middleware.JWTMiddleware(jwtService))
-	protected.Post("/", handler.Create)           // Crear reserva - Autenticado
-	protected.Put("/:id", handler.Update)         // Modificar reserva - Validar usuario en handler
-	protected.Delete("/:id", handler.Delete)      // Eliminar reserva - Validar usuario en handler
-	protected.Post("/:id/cancel", handler.Cancel) // Cancelar reserva - Validar usuario en handler
+	// Rutas protegidas - Solo ADMIN y GESTOR
+	bookings.Get("/", middleware.JWTMiddleware(jwtService), middleware.RequireRoleByName("ADMIN", "GESTOR"), handler.GetAll)
+	bookings.Get("/:id", middleware.JWTMiddleware(jwtService), middleware.RequireRoleByName("ADMIN", "GESTOR"), handler.GetByID)
+
+	// Rutas protegidas - Autenticado (cualquier usuario autenticado)
+	bookings.Post("/", middleware.JWTMiddleware(jwtService), handler.Create)
+	bookings.Put("/:id", middleware.JWTMiddleware(jwtService), handler.Update)
+	bookings.Delete("/:id", middleware.JWTMiddleware(jwtService), handler.Delete)
+	bookings.Post("/:id/cancel", middleware.JWTMiddleware(jwtService), handler.Cancel)
 }

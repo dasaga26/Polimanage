@@ -141,14 +141,14 @@ func main() {
 	// Repository Profile
 	profileRepo := profileInfra.NewProfileRepository(database.DB)
 
-	// Aplicación - ProfileService
-	profileService := profileApp.NewProfileService(profileRepo)
+	// Aplicación - ProfileService (necesita cryptoService)
+	profileService := profileApp.NewProfileService(profileRepo, cryptoService)
 
 	// Presentación - ProfileHandler
 	profileHandler := profilePres.NewProfileHandler(profileService)
 
-	// Rutas Profile
-	profilePres.RegisterProfileRoutes(app, profileHandler)
+	// Rutas Profile (protegidas con JWT)
+	profilePres.RegisterProfileRoutes(app, profileHandler, jwtService)
 
 	// ============================================================
 	// MÓDULO ROLES (Catálogo de Roles)

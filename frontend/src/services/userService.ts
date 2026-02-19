@@ -1,7 +1,7 @@
 import { apiGo } from './api';
 
 export interface User {
-  id: number;
+  id: string; // UUID
   roleId: number;
   slug: string;
   email: string;

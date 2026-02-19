@@ -1,4 +1,4 @@
-import { apiGo } from '@/config/axios';
+import { apiGo } from './api';
 import type { ClubMembership, Club } from '@/types/clubTypes';
 
 export interface RenewMembershipData {

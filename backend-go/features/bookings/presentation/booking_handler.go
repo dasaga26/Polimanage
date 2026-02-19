@@ -109,14 +109,25 @@ func (h *BookingHandler) Create(c *fiber.Ctx) error {
 	// UserID Assignment
 	var userID uuid.UUID
 	if req.UserID != "" {
+		// Si se proporciona UserID en el request, usarlo (para admins creando reservas para otros)
 		parsedID, err := uuid.Parse(req.UserID)
 		if err != nil {
 			return c.Status(400).JSON(fiber.Map{"error": "UserID inválido"})
 		}
 		userID = parsedID
 	} else {
-		// Default UUID (puedes definir uno por defecto o retornar error)
-		return c.Status(400).JSON(fiber.Map{"error": "UserID es requerido"})
+		// Si no se proporciona UserID, usar el del usuario autenticado (JWT context)
+		jwtUserID := c.Locals("userID")
+		if jwtUserID == nil {
+			return c.Status(401).JSON(fiber.Map{"error": "No autenticado"})
+		}
+
+		// El JWT middleware guarda userID como uuid.UUID directamente
+		var ok bool
+		userID, ok = jwtUserID.(uuid.UUID)
+		if !ok {
+			return c.Status(500).JSON(fiber.Map{"error": "Error de autenticación"})
+		}
 	}
 
 	// Mapear Request -> Domain Entity

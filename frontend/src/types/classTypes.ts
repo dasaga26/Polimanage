@@ -6,7 +6,7 @@ export interface ClassEnrollment {
   id: number;
   classId: number;
   classSlug?: string;
-  userId: number;
+  userId: string; // UUID
   userSlug?: string;
   userName?: string;
   userEmail?: string;
@@ -22,7 +22,7 @@ export interface Class {
   slug: string;
   title?: string;
   name: string;
-  instructorId: number;
+  instructorId: string; // UUID
   instructorSlug?: string;
   instructorName?: string;
   pistaId: number;
@@ -44,7 +44,7 @@ export interface Class {
 // DTO para crear una nueva clase
 export interface CreateClassDTO {
   title: string;  // Changed from 'name' to match backend
-  instructorId: number;
+  instructorId: string; // UUID
   pistaId: number;
   maxCapacity: number;
   priceCents: number;
