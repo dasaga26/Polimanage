@@ -31,17 +31,38 @@ type User struct {
 	StripeCustomerID *string        `gorm:"type:varchar(255)"`
 	IsMember         bool           `gorm:"default:false"`
 	IsActive         bool           `gorm:"default:true"`
+	SessionVersion   int            `gorm:"default:1;not null"` // V2: Global Logout Switch
 	LastLoginAt      *time.Time     `gorm:"type:timestamptz"`
 	CreatedAt        time.Time      `gorm:"type:timestamptz;default:NOW()"`
 	UpdatedAt        time.Time      `gorm:"type:timestamptz;default:NOW()"`
 	DeletedAt        gorm.DeletedAt `gorm:"index"`
 
 	// Relaciones
-	Role        Role              `gorm:"foreignKey:RoleID"`
-	Bookings    []Booking         `gorm:"foreignKey:UserID"`
-	Classes     []Class           `gorm:"foreignKey:InstructorID"`
-	Enrollments []ClassEnrollment `gorm:"foreignKey:UserID"`
-	Payments    []Payment         `gorm:"foreignKey:UserID"`
+	Role            Role              `gorm:"foreignKey:RoleID"`
+	Bookings        []Booking         `gorm:"foreignKey:UserID"`
+	Classes         []Class           `gorm:"foreignKey:InstructorID"`
+	Enrollments     []ClassEnrollment `gorm:"foreignKey:UserID"`
+	Payments        []Payment         `gorm:"foreignKey:UserID"`
+	RefreshSessions []RefreshSession  `gorm:"foreignKey:UserID"`
+}
+
+// RefreshSession representa una sesión activa con refresh token (V2)
+// Soporta multi-device y detección de robo de tokens
+type RefreshSession struct {
+	ID               uint      `gorm:"primaryKey"`
+	UserID           uuid.UUID `gorm:"type:uuid;not null;index"`
+	DeviceID         string    `gorm:"type:varchar(255);not null;uniqueIndex"` // UUID único por navegador/app
+	FamilyID         uuid.UUID `gorm:"type:uuid;not null;index"`               // Agrupa cadenas de rotación
+	CurrentTokenHash string    `gorm:"type:varchar(255);not null"`             // Hash del único token válido
+	SessionVersion   int       `gorm:"not null"`                               // Snapshot de User.SessionVersion
+	ExpiresAt        time.Time `gorm:"type:timestamptz;not null;index"`
+	Revoked          bool      `gorm:"default:false;not null"`
+	Reason           string    `gorm:"type:varchar(50)"` // "logout", "reuse_detection", "replaced"
+	CreatedAt        time.Time `gorm:"type:timestamptz;default:NOW()"`
+	UpdatedAt        time.Time `gorm:"type:timestamptz;default:NOW()"`
+
+	// Relaciones
+	User User `gorm:"foreignKey:UserID"`
 }
 
 // ======================================================================================
@@ -207,6 +228,7 @@ type Payment struct {
 // TableName overrides
 func (Role) TableName() string            { return "roles" }
 func (User) TableName() string            { return "users" }
+func (RefreshSession) TableName() string  { return "refresh_sessions" }
 func (Pista) TableName() string           { return "pistas" }
 func (Booking) TableName() string         { return "bookings" }
 func (Class) TableName() string           { return "classes" }

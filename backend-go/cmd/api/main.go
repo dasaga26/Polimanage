@@ -82,11 +82,12 @@ func main() {
 		AppName: "PoliManage Backend Go v2.0 - Clean Architecture",
 	})
 
-	// Middleware CORS
+	// Middleware CORS - V2: Soporte para cookies con withCredentials
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowMethods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
-		AllowHeaders: "Origin,Content-Type,Accept,Authorization",
+		AllowOrigins:     "http://localhost:5173,http://localhost:3000", // Frontend Vite y alternativas
+		AllowMethods:     "GET,POST,PUT,DELETE,PATCH,OPTIONS",
+		AllowHeaders:     "Origin,Content-Type,Accept,Authorization",
+		AllowCredentials: true, // V2: Permite envío de cookies
 	}))
 
 	// ============================================================
@@ -110,8 +111,11 @@ func main() {
 	// Repository compartido
 	userRepo := userInfra.NewUserRepository(database.DB)
 
-	// Aplicación - AuthService
-	authService := authApp.NewAuthService(userRepo, cryptoService, jwtService, avatarService)
+	// V2: Repository para RefreshSessions
+	sessionRepo := authInfra.NewRefreshSessionRepository(database.DB)
+
+	// Aplicación - AuthService (V2: Incluye sessionRepo)
+	authService := authApp.NewAuthService(userRepo, sessionRepo, cryptoService, jwtService, avatarService)
 
 	// Presentación - AuthHandler
 	authHandler := authPres.NewAuthHandler(authService)

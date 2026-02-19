@@ -71,6 +71,7 @@ func Migrate() error {
 		// Módulo 1: Identidad
 		&database.Role{},
 		&database.User{},
+		&database.RefreshSession{}, // V2: Sesiones de refresh token
 
 		// Módulo 2: Recursos y Reservas
 		&database.Pista{},

@@ -1,16 +1,20 @@
 // ============================================================
-// AUTH SERVICE - API calls para autenticación
+// AUTH SERVICE - API calls para autenticación V2
+// V2: Soporta cookies HttpOnly, deviceId, y refresh automático
 // ============================================================
 
 import { apiGo } from './api';
-import type { LoginCredentials, RegisterData, AuthResponse, User } from '../types/authTypes';
+import type { LoginCredentials, RegisterData, AuthResponse, User, RefreshResponse } from '../types/authTypes';
 
 export const authService = {
   /**
-   * Login - Autenticar usuario
+   * Login - Autenticar usuario (V2)
+   * Retorna accessToken y deviceId, refreshToken va en cookie
    */
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const { data } = await apiGo.post<AuthResponse>('/auth/login', credentials);
+    const { data } = await apiGo.post<AuthResponse>('/auth/login', credentials, {
+      withCredentials: true, // V2: Habilitar cookies
+    });
     return data;
   },
 
@@ -35,33 +39,34 @@ export const authService = {
   },
 
   /**
-   * Refresh Token - Renovar token expirado
+   * Refresh Token - Renovar token expirado (V2)
+   * Lee refresh token de cookie automáticamente
    */
-  refreshToken: async (token: string): Promise<{ token: string }> => {
-    const { data } = await apiGo.post<{ token: string }>(
-      '/auth/refresh',
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+  refreshToken: async (): Promise<RefreshResponse> => {
+    const { data } = await apiGo.post<RefreshResponse>('/auth/refresh', {}, {
+      withCredentials: true, // V2: Enviar cookie automáticamente
+    });
     return data;
   },
 
   /**
-   * Logout - Cerrar sesión
+   * Logout - Cerrar sesión del dispositivo actual (V2)
    */
-  logout: async (token: string): Promise<void> => {
-    await apiGo.post(
-      '/auth/logout',
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+  logout: async (deviceId: string | null): Promise<void> => {
+    await apiGo.post('/auth/logout', { deviceId }, {
+      withCredentials: true, // V2: Limpiar cookie
+    });
+  },
+
+  /**
+   * Logout All - Cerrar todas las sesiones (V2)
+   */
+  logoutAll: async (token: string): Promise<void> => {
+    await apiGo.post('/auth/logout-all', {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: true,
+    });
   },
 };

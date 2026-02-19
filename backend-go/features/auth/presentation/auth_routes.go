@@ -5,8 +5,8 @@ import (
 )
 
 // ======================================================================================
-// AUTH ROUTES
-// CtrlAuth: register, login, logout
+// AUTH ROUTES - V2
+// CtrlAuth: register, login, logout, refresh, logout-all
 // ======================================================================================
 
 func RegisterAuthRoutes(app *fiber.App, handler *AuthHandler) {
@@ -15,6 +15,8 @@ func RegisterAuthRoutes(app *fiber.App, handler *AuthHandler) {
 	// Rutas públicas (sin autenticación)
 	auth.Post("/register", handler.Register)
 	auth.Post("/login", handler.Login)
+	auth.Post("/refresh", handler.RefreshToken) // V2: Refresh es público (usa cookie)
+	auth.Post("/logout", handler.Logout)        // V2: Logout es público
 
 	// Rutas protegidas se registran desde el main con middleware JWT
 }
@@ -22,6 +24,5 @@ func RegisterAuthRoutes(app *fiber.App, handler *AuthHandler) {
 // RegisterProtectedAuthRoutes registra rutas que requieren autenticación
 func RegisterProtectedAuthRoutes(auth fiber.Router, handler *AuthHandler) {
 	auth.Get("/me", handler.GetMe)
-	auth.Post("/refresh", handler.RefreshToken)
-	auth.Post("/logout", handler.Logout)
+	auth.Post("/logout-all", handler.LogoutAllDevices) // V2: Logout global
 }

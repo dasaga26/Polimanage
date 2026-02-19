@@ -44,6 +44,7 @@ func (m *UserMapper) ToDomain(dbUser *database.User) *domain.User {
 		AvatarURL:        avatarURL,
 		StripeCustomerID: stripeID,
 		IsActive:         dbUser.IsActive,
+		SessionVersion:   dbUser.SessionVersion, // V2
 		LastLoginAt:      dbUser.LastLoginAt,
 		CreatedAt:        dbUser.CreatedAt,
 		UpdatedAt:        dbUser.UpdatedAt,
@@ -63,6 +64,7 @@ func (m *UserMapper) ToDatabase(domainUser *domain.User) *database.User {
 		AvatarURL:        domainUser.AvatarURL,
 		StripeCustomerID: domainUser.StripeCustomerID,
 		IsActive:         domainUser.IsActive,
+		SessionVersion:   domainUser.SessionVersion, // V2
 		LastLoginAt:      domainUser.LastLoginAt,
 	}
 }

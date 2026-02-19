@@ -23,6 +23,7 @@ type User struct {
 	StripeCustomerID *string
 	IsMember         bool
 	IsActive         bool
+	SessionVersion   int // V2: Para logout global
 	LastLoginAt      *time.Time
 	CreatedAt        time.Time
 	UpdatedAt        time.Time

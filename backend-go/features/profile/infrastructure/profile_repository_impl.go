@@ -36,7 +36,7 @@ func (r *ProfileRepositoryImpl) GetProfileByUsername(username string) (*domain.P
 		Username:  user.Slug,
 		FullName:  user.FullName,
 		AvatarURL: user.AvatarURL,
-		Bio:       nil, // TODO: Agregar campo bio a User
+		Bio:       nil,
 		CreatedAt: user.CreatedAt,
 	}, nil
 }

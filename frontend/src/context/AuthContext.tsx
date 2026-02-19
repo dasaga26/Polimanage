@@ -1,11 +1,13 @@
 // ============================================================
-// AUTH CONTEXT - Context API para estado global de autenticación
+// AUTH CONTEXT - Context API para estado global de autenticación V2
+// V2: Soporta multi-device, cookies HttpOnly, y BroadcastChannel
 // ============================================================
 
 import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { authService } from '../services/authService';
 import type { User, LoginCredentials, RegisterData, AuthContextType } from '../types/authTypes';
+import { v4 as uuidv4 } from 'uuid';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -14,13 +16,27 @@ interface AuthProviderProps {
 }
 
 const TOKEN_KEY = 'polimanage_token';
+const DEVICE_ID_KEY = 'polimanage_device_id'; // V2
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [deviceId, setDeviceId] = useState<string | null>(null); // V2
   const [isLoading, setIsLoading] = useState(true);
   const [errorMSG, setErrorMSG] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState(false);
+
+  // ============================================================
+  // V2: INICIALIZAR DEVICE ID
+  // ============================================================
+  useEffect(() => {
+    let storedDeviceId = localStorage.getItem(DEVICE_ID_KEY);
+    if (!storedDeviceId) {
+      storedDeviceId = uuidv4();
+      localStorage.setItem(DEVICE_ID_KEY, storedDeviceId);
+    }
+    setDeviceId(storedDeviceId);
+  }, []);
 
   // ============================================================
   // INICIALIZACIÓN - Cargar datos del localStorage
@@ -38,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const userData = await authService.getMe(storedToken);
             setUser(userData);
           } catch (error) {
-            // Token inválido o expirado
+            // Token inválido o expirado - El interceptor manejará el refresh
             console.error('Token inválido:', error);
             localStorage.removeItem(TOKEN_KEY);
             setToken(null);
@@ -56,7 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // ============================================================
-  // LOGIN - Autenticar usuario
+  // LOGIN - Autenticar usuario (V2)
   // ============================================================
   const useLogin = async (credentials: LoginCredentials): Promise<void> => {
     try {
@@ -64,13 +80,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setErrorMSG(null);
       setIsCorrect(false);
 
-      const response = await authService.login(credentials);
+      // V2: Enviar deviceId si ya existe
+      const loginData = {
+        ...credentials,
+        deviceId: deviceId || undefined,
+      };
 
-      // Guardar solo token en localStorage
-      localStorage.setItem(TOKEN_KEY, response.token);
-      setToken(response.token);
+      const response = await authService.login(loginData);
+
+      // V2: Guardar access token en localStorage
+      localStorage.setItem(TOKEN_KEY, response.accessToken);
+      setToken(response.accessToken);
       setUser(response.user);
       setIsCorrect(true);
+
+      // V2: Actualizar deviceId si el backend retornó uno nuevo
+      if (response.deviceId) {
+        localStorage.setItem(DEVICE_ID_KEY, response.deviceId);
+        setDeviceId(response.deviceId);
+      }
 
       console.log('✅ Login exitoso:', response.user.email);
     } catch (error: any) {
@@ -97,10 +125,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const response = await authService.register(data);
 
-      // Guardar solo token en localStorage
-      localStorage.setItem(TOKEN_KEY, response.token);
-      // Actualizar estado
-      setToken(response.token);
+      // V2: Guardar access token en localStorage
+      localStorage.setItem(TOKEN_KEY, response.accessToken);
+      setToken(response.accessToken);
       setUser(response.user);
       setIsCorrect(true);
 
@@ -119,12 +146,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // ============================================================
-  // LOGOUT - Cerrar sesión
+  // LOGOUT - Cerrar sesión del dispositivo actual (V2)
   // ============================================================
   const logout = (): void => {
     try {
-      // Limpiar token de localStorage
+      // V2: Notificar al backend
+      if (deviceId) {
+        authService.logout(deviceId).catch(err => {
+          console.error('Error al hacer logout en backend:', err);
+        });
+      }
+
+      // Limpiar localStorage
       localStorage.removeItem(TOKEN_KEY);
+      // NO eliminar deviceId, se reutiliza en próximos logins
+      
       // Limpiar estado
       setToken(null);
       setUser(null);
@@ -138,19 +174,53 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // ============================================================
-  // REFRESH TOKEN - Renovar token expirado
+  // V2: LOGOUT ALL - Cerrar todas las sesiones (Logout Global)
+  // ============================================================
+  const logoutAll = async (): Promise<void> => {
+    try {
+      if (!token) {
+        throw new Error('No hay sesión activa');
+      }
+
+      // Llamar al endpoint de logout global
+      await authService.logoutAll(token);
+
+      // Limpiar localStorage
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(DEVICE_ID_KEY);
+      
+      // Limpiar estado
+      setToken(null);
+      setUser(null);
+      setDeviceId(null);
+      setIsCorrect(false);
+      setErrorMSG(null);
+
+      // Generar nuevo deviceId
+      const newDeviceId = uuidv4();
+      localStorage.setItem(DEVICE_ID_KEY, newDeviceId);
+      setDeviceId(newDeviceId);
+
+      console.log('✅ Logout global exitoso');
+    } catch (error) {
+      console.error('❌ Error en logout global:', error);
+      throw error;
+    }
+  };
+
+  // ============================================================
+  // REFRESH TOKEN - Renovar token expirado (V2)
+  // El interceptor de Axios maneja esto automáticamente
+  // Esta función es para uso manual si se necesita
   // ============================================================
   const refreshToken = async (): Promise<void> => {
     try {
-      if (!token) {
-        throw new Error('No hay token para renovar');
-      }
+      // V2: No necesita token como parámetro, usa cookie
+      const response = await authService.refreshToken();
 
-      const response = await authService.refreshToken(token);
-
-      // Actualizar token en localStorage
-      localStorage.setItem(TOKEN_KEY, response.token);
-      setToken(response.token);
+      // Actualizar access token en localStorage
+      localStorage.setItem(TOKEN_KEY, response.accessToken);
+      setToken(response.accessToken);
 
       console.log('✅ Token renovado');
     } catch (error) {
@@ -166,12 +236,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     user,
     token,
+    deviceId, // V2
     isAuthenticated: !!user && !!token,
     isLoading,
     errorMSG,
     useLogin,
     useRegister,
     logout,
+    logoutAll, // V2
     refreshToken,
     isCorrect,
   };

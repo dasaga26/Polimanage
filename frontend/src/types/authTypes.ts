@@ -30,6 +30,7 @@ export interface User {
 export interface LoginCredentials {
   email: string;
   password: string;
+  deviceId?: string; // V2: Opcional
 }
 
 export interface RegisterData {
@@ -41,18 +42,25 @@ export interface RegisterData {
 
 export interface AuthResponse {
   user: User;
-  token: string;
+  accessToken: string; // V2: Renombrado de 'token'
+  deviceId?: string;   // V2: Retornado al cliente
+}
+
+export interface RefreshResponse {
+  accessToken: string;
 }
 
 export interface AuthContextType {
   user: User | null;
-  token: string | null;
+  token: string | null; // Access token
+  deviceId: string | null; // V2: Device identifier
   isAuthenticated: boolean;
   isLoading: boolean;
   errorMSG: string | null;
   useLogin: (credentials: LoginCredentials) => Promise<void>;
   useRegister: (data: RegisterData) => Promise<void>;
   logout: () => void;
+  logoutAll: () => Promise<void>; // V2: Logout global
   refreshToken: () => Promise<void>;
   isCorrect: boolean;
 }

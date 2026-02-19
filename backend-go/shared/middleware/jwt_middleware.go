@@ -41,8 +41,8 @@ func JWTMiddleware(jwtService security.JWTService) fiber.Handler {
 		}
 
 		// PASO 3-5: ¿Firma válida? ¿No está expirado? ¿Claims requeridos existen?
-		// Estos pasos se ejecutan dentro de ValidateToken en auth/infrastructure/jwt_service_impl.go
-		claims, err := jwtService.ValidateToken(token)
+		// Estos pasos se ejecutan dentro de ValidateAccessToken en shared/security/jwt_service_impl.go
+		claims, err := jwtService.ValidateAccessToken(token)
 		if err != nil {
 			// Distinguir entre token expirado y token inválido
 			if err == security.ErrTokenExpired {
@@ -71,6 +71,7 @@ func JWTMiddleware(jwtService security.JWTService) fiber.Handler {
 		c.Locals("email", claims.Email)
 		c.Locals("roleID", claims.RoleID)
 		c.Locals("roleName", claims.RoleName)
+		c.Locals("sessionVersion", claims.SessionVersion) // V2: Para validación de logout global
 
 		return c.Next()
 	}
@@ -92,7 +93,7 @@ func OptionalJWTMiddleware(jwtService security.JWTService) fiber.Handler {
 		}
 
 		token := parts[1]
-		claims, err := jwtService.ValidateToken(token)
+		claims, err := jwtService.ValidateAccessToken(token)
 		if err != nil {
 			return c.Next()
 		}
