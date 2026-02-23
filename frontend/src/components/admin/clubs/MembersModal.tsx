@@ -18,7 +18,8 @@ interface MembersModalProps {
 
 export function MembersModal({ isOpen, onClose, club }: MembersModalProps) {
     const { data: members = [], isLoading } = useClubMembersQuery(club?.slug || '');
-    const { data: allUsers = [] } = useUsersQuery();
+    const { data: usersData } = useUsersQuery({ limit: 1000 });
+    const allUsers = usersData?.data || [];
     const addMemberMutation = useAddMember();
     const removeMutation = useRemoveMember();
     const [isMultiSelectOpen, setIsMultiSelectOpen] = useState(false);

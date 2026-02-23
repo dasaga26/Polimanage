@@ -1,9 +1,18 @@
 import { apiGo } from './api';
-import type { Club, CreateClubData, UpdateClubData, ClubMembership } from '@/types/clubTypes';
+import type { Club, CreateClubData, UpdateClubData, ClubMembership, ClubQueryParams } from '@/types/clubTypes';
+import type { PaginatedResponse } from '@/types/pagination';
 
 export const clubService = {
-  getAll: async (): Promise<Club[]> => {
-    const { data } = await apiGo.get('/clubs');
+  getAll: async (params?: ClubQueryParams): Promise<PaginatedResponse<Club>> => {
+    const queryParams = new URLSearchParams();
+    
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.sort) queryParams.append('sort', params.sort);
+
+    const { data } = await apiGo.get(`/clubs?${queryParams.toString()}`);
     return data;
   },
 

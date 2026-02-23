@@ -41,8 +41,10 @@ export function CreateClassModal({
   prefill,
   classToEdit,
 }: CreateClassModalProps) {
-  const { data: pistas = [] } = usePistasQuery();
-  const { data: allUsers = [] } = useUsersQuery();
+  const { data: pistasData } = usePistasQuery({ limit: 1000 });
+  const pistas = pistasData?.data || [];
+  const { data: usersData } = useUsersQuery({ limit: 1000 });
+  const allUsers = usersData?.data || [];
 
   // Filtrar usuarios: Solo ADMIN (1), GESTOR (2) y MONITOR (4) pueden ser monitores
   const instructors = allUsers.filter((u) => [4].includes(u.roleId));

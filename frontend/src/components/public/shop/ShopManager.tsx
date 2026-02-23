@@ -6,10 +6,13 @@ import { Pagination } from './Pagination';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SlidersHorizontal } from 'lucide-react';
-import type { PistaPagedResponse } from '@/services/pistaService';
+import type { Pista } from '@/services/pistaService';
 
 interface ShopManagerProps {
-    data?: PistaPagedResponse;
+    pistas: Pista[];
+    totalPistas: number;
+    currentPage: number;
+    totalPages: number;
     isLoading: boolean;
     isError: boolean;
     maxPriceLimit?: number;
@@ -30,7 +33,10 @@ interface ShopManagerProps {
 }
 
 export function ShopManager({
-    data,
+    pistas,
+    totalPistas,
+    currentPage,
+    totalPages,
     isLoading,
     isError,
     maxPriceLimit,
@@ -91,15 +97,15 @@ export function ShopManager({
                 </div>
 
                 {/* Info de resultados */}
-                {data && (
+                {pistas.length > 0 && (
                     <div className="mt-5 pt-5 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3">
                         <span className="text-sm text-gray-600">
                             Mostrando{' '}
                             <span className="font-semibold text-gray-900">
-                                {data.items.length}
+                                {pistas.length}
                             </span>{' '}
                             de{' '}
-                            <span className="font-semibold text-gray-900">{data.total}</span> pistas
+                            <span className="font-semibold text-gray-900">{totalPistas}</span> pistas
                         </span>
                         {filters.deporte && (
                             <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full font-medium border border-blue-200">
@@ -144,14 +150,14 @@ export function ShopManager({
                     )}
 
                     {/* Grid de resultados */}
-                    <PistaGrid pistas={data?.items || []} isLoading={isLoading} />
+                    <PistaGrid pistas={pistas} isLoading={isLoading} />
 
                     {/* Paginación */}
-                    {data && data.total_pages > 1 && (
+                    {totalPages > 1 && (
                         <div className="mt-10">
                             <Pagination
-                                currentPage={filters.page}
-                                totalPages={data.total_pages}
+                                currentPage={currentPage}
+                                totalPages={totalPages}
                                 onPageChange={onPageChange}
                             />
                         </div>

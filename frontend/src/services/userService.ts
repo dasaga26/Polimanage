@@ -1,4 +1,5 @@
 import { apiGo } from './api';
+import type { PaginatedResponse, PaginationParams } from '@/types/pagination';
 
 export interface User {
   id: string; // UUID
@@ -13,6 +14,10 @@ export interface User {
   roleName: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UserQueryParams extends PaginationParams {
+  // Heredamos: page, limit, search, sort, status
 }
 
 export interface CreateUserDTO {
@@ -31,9 +36,19 @@ export interface UpdateUserDTO {
 }
 
 export const userService = {
-  getAll: async (roleId?: number): Promise<User[]> => {
-    const params = roleId ? { role_id: roleId } : {};
-    const { data } = await apiGo.get<User[]>('/users', { params });
+  getAll: async (params?: UserQueryParams): Promise<PaginatedResponse<User>> => {
+    const searchParams = new URLSearchParams();
+    
+    if (params?.page) searchParams.set('page', String(params.page));
+    if (params?.limit) searchParams.set('limit', String(params.limit));
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.sort) searchParams.set('sort', params.sort);
+    
+    const queryString = searchParams.toString();
+    const url = queryString ? `/users?${queryString}` : '/users';
+    
+    const { data } = await apiGo.get<PaginatedResponse<User>>(url);
     return data;
   },
 

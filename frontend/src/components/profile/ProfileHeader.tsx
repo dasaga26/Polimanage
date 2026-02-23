@@ -13,6 +13,23 @@ interface ProfileHeaderProps {
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onChangePhoto }) => {
   const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullName)}&size=200&background=135bec&color=fff`;
   
+  // Función para formatear fecha de creación de forma segura
+  const formatMemberSince = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      
+      // Verificar si es una fecha válida (no 0001, 1970, etc.)
+      if (!dateString || year < 2000 || isNaN(year)) {
+        return new Date().getFullYear().toString();
+      }
+      
+      return year.toString();
+    } catch {
+      return new Date().getFullYear().toString();
+    }
+  };
+  
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
       {/* Header Gradient */}
@@ -42,7 +59,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onChangePhoto })
                 </span>
               )}
               <span className="text-sm text-slate-500 dark:text-slate-400">
-                • Miembro desde {new Date(profile.createdAt).getFullYear()}
+                • Miembro desde {formatMemberSince(profile.createdAt)}
               </span>
             </div>
           </div>

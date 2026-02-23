@@ -3,6 +3,7 @@ package presentation
 import (
 	"backend-go/features/pista/application"
 	"backend-go/features/pista/domain"
+	"backend-go/shared/pagination"
 	"errors"
 	"strconv"
 
@@ -23,66 +24,52 @@ func NewPistaHandler(service *application.PistaService) *PistaHandler {
 // @Summary Listar pistas con filtros avanzados
 // @Tags pistas
 // @Produce json
-// @Param q query string false "Búsqueda por nombre o ubicación"
+// @Param search query string false "Búsqueda por nombre o ubicación"
 // @Param deporte query string false "Filtro por tipo de deporte (FUTBOL, TENIS, BALONCESTO, PADEL, POLIDEPORTIVA)"
-// @Param min_price query int false "Precio mínimo por hora (en euros)"
-// @Param max_price query int false "Precio máximo por hora (en euros)"
+// @Param min_price query int false "Precio mínimo por hora (en céntimos)"
+// @Param max_price query int false "Precio máximo por hora (en céntimos)"
 // @Param sort query string false "Ordenación: precio_asc, precio_desc, nombre_asc, nombre_desc" default(id_desc)
 // @Param page query int false "Número de página" default(1)
-// @Param limit query int false "Items por página" default(12)
-// @Success 200 {object} PistaPagedResponse
+// @Param limit query int false "Items por página" default(6)
+// @Success 200 {object} pagination.PaginatedResponse
 // @Router /api/pistas [get]
 func (h *PistaHandler) GetAll(c *fiber.Ctx) error {
-	// Parsear query params
-	var params PistaQueryParams
+	// Parsear query params usando la estructura compartida
+	var params pagination.PaginationParams
 	if err := c.QueryParser(&params); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Parámetros de búsqueda inválidos",
 		})
 	}
 
-	// Aplicar defaults
+	// Aplicar defaults si no se especifican
 	if params.Page < 1 {
 		params.Page = 1
 	}
 	if params.Limit < 1 {
-		params.Limit = 12
+		params.Limit = 6
 	}
 
-	// Convertir a domain params
-	domainParams := domain.PistaQueryParams{
-		Q:        params.Q,
-		Deporte:  params.Deporte,
-		MinPrice: params.MinPrice,
-		MaxPrice: params.MaxPrice,
-		Sort:     params.Sort,
-		Page:     params.Page,
-		Limit:    params.Limit,
-	}
-
-	// Llamar al servicio con búsqueda avanzada
-	domainResponse, err := h.service.GetAllAdvanced(domainParams)
+	// Llamar al servicio con paginación
+	response, err := h.service.GetAllPaginated(params)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Error al obtener las pistas",
 		})
 	}
 
-	// Convertir domain response a presentation response
-	items := make([]PistaResponse, len(domainResponse.Items))
-	for i := range domainResponse.Items {
-		items[i] = ToPistaResponse(&domainResponse.Items[i])
+	// Convertir domain entities a presentation DTOs
+	pistasData := response.Data.([]domain.Pista)
+	pistasResponse := make([]PistaResponse, len(pistasData))
+	for i := range pistasData {
+		pistasResponse[i] = ToPistaResponse(&pistasData[i])
 	}
 
-	response := PistaPagedResponse{
-		Items:      items,
-		Total:      domainResponse.Total,
-		Page:       domainResponse.Page,
-		TotalPages: domainResponse.TotalPages,
-		Limit:      domainResponse.Limit,
-	}
-
-	return c.JSON(response)
+	// Devolver respuesta paginada con DTOs
+	return c.JSON(pagination.PaginatedResponse{
+		Data: pistasResponse,
+		Meta: response.Meta,
+	})
 }
 
 // GetByID maneja GET /api/pistas/:id

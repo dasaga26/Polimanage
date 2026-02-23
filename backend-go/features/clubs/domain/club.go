@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"backend-go/shared/pagination"
 	"time"
 
 	"github.com/google/uuid"
@@ -37,6 +38,7 @@ const (
 // ClubRepository define el contrato de persistencia para clubs
 type ClubRepository interface {
 	FindAll() ([]Club, error)
+	FindAllPaginated(params pagination.PaginationParams) ([]Club, *pagination.PaginationMeta, error)
 	FindByID(id int) (*Club, error)
 	FindBySlug(slug string) (*Club, error)
 	Create(club *Club) error

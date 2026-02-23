@@ -26,7 +26,8 @@ export function EnrollmentManagerModal({
     onClose,
     selectedClass,
 }: EnrollmentManagerModalProps) {
-    const { data: allUsers = [] } = useUsersQuery();
+    const { data: usersData } = useUsersQuery({ limit: 1000 });
+    const allUsers = usersData?.data || [];
     const [isMultiSelectOpen, setIsMultiSelectOpen] = useState(false);
     const enrollMutation = useEnrollStudent();
     const unenrollMutation = useUnenrollStudent();

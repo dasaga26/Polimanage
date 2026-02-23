@@ -1,13 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { pistaService, type PistaQueryParams } from '@/services/pistaService';
 
-export const usePistasQuery = () => {
+/**
+ * Hook para obtener pistas con paginación y filtros
+ * @param params Parámetros de paginación y filtros
+ */
+export const usePistasQuery = (params?: PistaQueryParams) => {
   return useQuery({
-    queryKey: ['pistas'],
-    queryFn: () => pistaService.getAll(),
+    queryKey: ['pistas', params],
+    queryFn: () => pistaService.getAll(params),
+    staleTime: 30000, // 30 segundos
   });
 };
 
+/**
+ * DEPRECATED: Usar usePistasQuery con params en su lugar
+ */
 export const usePistasAdvancedQuery = (params: PistaQueryParams) => {
   return useQuery({
     queryKey: ['pistas', 'advanced', params],

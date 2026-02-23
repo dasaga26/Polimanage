@@ -1,4 +1,5 @@
 import { apiGo } from './api';
+import type { PaginatedResponse, PaginationParams } from '@/types/pagination';
 
 export interface Pista {
   id: number;
@@ -12,16 +13,16 @@ export interface Pista {
   estado: string;
 }
 
-export interface PistaQueryParams {
-  q?: string;
-  deporte?: string;
-  min_price?: number;
-  max_price?: number;
-  sort?: string;
-  page?: number;
-  limit?: number;
+/**
+ * Parámetros de query para filtrar y paginar pistas
+ * Extiende PaginationParams con campos específicos de pistas
+ */
+export interface PistaQueryParams extends PaginationParams {
+  // Hereda: page, limit, search, sort, deporte, min_price, max_price
+  q?: string; // Alias para search (mantener compatibilidad)
 }
 
+// DEPRECATED: Usar PaginatedResponse<Pista> en su lugar
 export interface PistaPagedResponse {
   items: Pista[];
   total: number;
@@ -49,12 +50,29 @@ export interface UpdatePistaDTO {
 }
 
 export const pistaService = {
-  getAll: async (): Promise<Pista[]> => {
-    const { data } = await apiGo.get<PistaPagedResponse | Pista[]>('/pistas');
-    // Adaptación: Si el backend devuelve paginación, extraer items. Si es array, devolverlo.
-    return Array.isArray(data) ? data : data.items;
+  // Obtener todas las pistas con paginación y filtros
+  getAll: async (params?: PistaQueryParams): Promise<PaginatedResponse<Pista>> => {
+    const searchParams = new URLSearchParams();
+    
+    // Mapear 'q' a 'search' si existe
+    const search = params?.search || params?.q;
+    
+    if (params?.page) searchParams.set('page', String(params.page));
+    if (params?.limit) searchParams.set('limit', String(params.limit));
+    if (search) searchParams.set('search', search);
+    if (params?.deporte) searchParams.set('deporte', params.deporte);
+    if (params?.min_price !== undefined) searchParams.set('min_price', String(params.min_price));
+    if (params?.max_price !== undefined) searchParams.set('max_price', String(params.max_price));
+    if (params?.sort) searchParams.set('sort', params.sort);
+
+    const queryString = searchParams.toString();
+    const url = queryString ? `/pistas?${queryString}` : '/pistas';
+    
+    const { data } = await apiGo.get<PaginatedResponse<Pista>>(url);
+    return data;
   },
 
+  // DEPRECATED: Usar getAll con params en su lugar
   getAllAdvanced: async (
     params: PistaQueryParams,
     signal?: AbortSignal

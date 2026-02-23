@@ -2,6 +2,7 @@ package application
 
 import (
 	"backend-go/features/pista/domain"
+	"backend-go/shared/pagination"
 	"errors"
 )
 
@@ -23,6 +24,16 @@ func (s *PistaService) GetAll() ([]domain.Pista, error) {
 // GetAllAdvanced obtiene pistas con búsqueda, filtros, ordenación y paginación
 func (s *PistaService) GetAllAdvanced(params domain.PistaQueryParams) (*domain.PistaPagedResponse, error) {
 	return s.repo.FindAllAdvanced(params)
+}
+
+// GetAllPaginated obtiene pistas con paginación usando la estructura compartida
+func (s *PistaService) GetAllPaginated(params pagination.PaginationParams) (*pagination.PaginatedResponse, error) {
+	items, meta, err := s.repo.FindAllPaginated(params)
+	if err != nil {
+		return nil, err
+	}
+
+	return pagination.NewPaginatedResponse(items, meta), nil
 }
 
 // GetByID obtiene una pista por su ID

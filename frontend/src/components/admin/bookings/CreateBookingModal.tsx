@@ -40,8 +40,10 @@ export function CreateBookingModal({
     prefill,
     bookingToEdit
 }: CreateBookingModalProps) {
-    const { data: pistas = [] } = usePistasQuery();
-    const { data: users = [] } = useUsersQuery();
+    const { data: pistasData } = usePistasQuery({ limit: 1000 });
+    const pistas = pistasData?.data || [];
+    const { data: usersData } = useUsersQuery({ limit: 1000 });
+    const users = usersData?.data || [];
     const isEditing = !!bookingToEdit;
 
     // State

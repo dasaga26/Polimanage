@@ -3,7 +3,8 @@ import { usePistasQuery } from '@/queries';
 import { PistasManager } from '@/components/admin/pistas/PistasManager';
 
 export default function PistasPage() {
-  const { data: pistas = [], isLoading } = usePistasQuery();
+  const { data, isLoading } = usePistasQuery({ limit: 1000 });
+  const pistas = data?.data || [];
 
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');

@@ -2,6 +2,7 @@ package application
 
 import (
 	"backend-go/features/users/domain"
+	"backend-go/shared/pagination"
 	"backend-go/shared/security"
 	"errors"
 	"strings"
@@ -34,6 +35,16 @@ func (s *UserService) GetAll() ([]domain.User, error) {
 // GetByRole obtiene usuarios por rol
 func (s *UserService) GetByRole(roleID uint) ([]domain.User, error) {
 	return s.repo.GetByRole(roleID)
+}
+
+// GetAllPaginated obtiene usuarios con paginación
+func (s *UserService) GetAllPaginated(params pagination.PaginationParams) (*pagination.PaginatedResponse, error) {
+	items, meta, err := s.repo.FindAllPaginated(params)
+	if err != nil {
+		return nil, err
+	}
+
+	return pagination.NewPaginatedResponse(items, meta), nil
 }
 
 // GetByID obtiene un usuario por ID

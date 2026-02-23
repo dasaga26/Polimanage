@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"backend-go/features/users/domain"
 	"backend-go/shared/database"
+	"backend-go/shared/pagination"
 	"errors"
 	"strings"
 
@@ -133,4 +134,84 @@ func (r *UserRepositoryImpl) SlugExists(slug string) (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
+}
+
+// FindAllPaginated obtiene usuarios con paginación y filtros
+func (r *UserRepositoryImpl) FindAllPaginated(params pagination.PaginationParams) ([]domain.User, *pagination.PaginationMeta, error) {
+	var dbUsers []database.User
+	var totalItems int64
+
+	// Query base con Preload
+	query := r.db.Model(&database.User{}).Preload("Role")
+
+	// 1. Filtro de búsqueda (nombre, email, teléfono)
+	if params.Search != "" {
+		searchPattern := "%" + params.Search + "%"
+		query = query.Where(
+			"full_name ILIKE ? OR email ILIKE ? OR phone ILIKE ?",
+			searchPattern, searchPattern, searchPattern,
+		)
+	}
+
+	// 2. Filtro por estado (status: active/inactive)
+	if params.Status != "" {
+		switch params.Status {
+		case "active":
+			query = query.Where("is_active = ?", true)
+		case "inactive":
+			query = query.Where("is_active = ?", false)
+		}
+	}
+
+	// 3. Filtro por rol (usando el campo existente role_id)
+	// Nota: params.Deporte lo reutilizamos como filtro de rol
+	if params.Deporte != "" {
+		// Intentar parsear como número
+		query = query.Where("role_id = ?", params.Deporte)
+	}
+
+	// 4. Contar total de items (después de aplicar filtros)
+	if err := query.Count(&totalItems).Error; err != nil {
+		return nil, nil, err
+	}
+
+	// 5. Ordenación
+	switch params.Sort {
+	case "nombre_asc":
+		query = query.Order("full_name ASC")
+	case "nombre_desc":
+		query = query.Order("full_name DESC")
+	case "email_asc":
+		query = query.Order("email ASC")
+	case "email_desc":
+		query = query.Order("email DESC")
+	case "recientes":
+		query = query.Order("created_at DESC")
+	default:
+		query = query.Order("created_at DESC")
+	}
+
+	// 6. Aplicar paginación
+	offset := params.GetOffset()
+	query = query.Limit(params.Limit).Offset(offset)
+
+	// 7. Ejecutar query
+	if err := query.Find(&dbUsers).Error; err != nil {
+		return nil, nil, err
+	}
+
+	// 8. Mapear a dominio
+	users := make([]domain.User, len(dbUsers))
+	for i := range dbUsers {
+		users[i] = *r.mapper.ToDomain(&dbUsers[i])
+	}
+
+	// 9. Construir metadata
+	meta := pagination.NewPaginationMeta(
+		totalItems,
+		params.Page,
+		params.Limit,
+	)
+
+	return users, meta, nil
 }

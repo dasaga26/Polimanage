@@ -3,8 +3,8 @@ package presentation
 import (
 	"backend-go/features/users/application"
 	"backend-go/features/users/domain"
+	"backend-go/shared/pagination"
 	"errors"
-	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -28,37 +28,46 @@ func NewUserHandler(service *application.UserService) *UserHandler {
 // @Tags users
 // @Security BearerAuth
 // @Produce json
-// @Param role_id query int false "Filtrar por rol"
-// @Success 200 {array} UserResponse
+// @Param page query int false "Número de página"
+// @Param limit query int false "Elementos por página"
+// @Param search query string false "Búsqueda por nombre, email o teléfono"
+// @Param status query string false "Filtrar por estado (active/inactive)"
+// @Param sort query string false "Ordenación (nombre_asc, nombre_desc, email_asc, email_desc, recientes)"
+// @Success 200 {object} pagination.PaginatedResponse
 // @Router /api/users [get]
 func (h *UserHandler) GetAll(c *fiber.Ctx) error {
-	// Filtro opcional por role_id
-	roleIDParam := c.Query("role_id")
-
-	var users []domain.User
-	var err error
-
-	if roleIDParam != "" {
-		roleID, parseErr := strconv.ParseUint(roleIDParam, 10, 32)
-		if parseErr != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "role_id inválido"})
-		}
-		users, err = h.service.GetByRole(uint(roleID))
-	} else {
-		users, err = h.service.GetAll()
+	// Parsear parámetros de paginación
+	var params pagination.PaginationParams
+	if err := c.QueryParser(&params); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Parámetros inválidos"})
 	}
 
+	// Valores por defecto
+	if params.Page < 1 {
+		params.Page = 1
+	}
+	if params.Limit < 1 {
+		params.Limit = 10
+	}
+
+	// Obtener usuarios paginados
+	response, err := h.service.GetAllPaginated(params)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// serializer_user
-	response := make([]UserResponse, len(users))
+	// Serializar usuarios
+	users := response.Data.([]domain.User)
+	usersResponse := make([]UserResponse, len(users))
 	for i := range users {
-		response[i] = ToUserResponse(&users[i])
+		usersResponse[i] = ToUserResponse(&users[i])
 	}
 
-	return c.JSON(response)
+	// Retornar respuesta paginada
+	return c.JSON(pagination.PaginatedResponse{
+		Data: usersResponse,
+		Meta: response.Meta,
+	})
 }
 
 // GetBySlug maneja GET /users/:slug (getUser)

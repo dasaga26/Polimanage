@@ -3,7 +3,8 @@ import { useClassesQuery } from '@/queries/classes/useClassesQuery';
 import { ClassesManager } from '@/components/admin/classes/ClassesManager';
 
 export default function ClassesPage() {
-  const { data: classes = [], isLoading } = useClassesQuery();
+  const { data, isLoading } = useClassesQuery({ limit: 1000 });
+  const classes = data?.data || [];
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

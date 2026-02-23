@@ -105,8 +105,8 @@ func main() {
 	// ============================================================
 	// MÓDULO 1: FEATURE AUTH (CtrlAuth: register, login, logout)
 	// ============================================================
-	// Infraestructura - Servicios específicos de Auth (Pravatar)
-	avatarService := authInfra.NewPravatarService()
+	// Infraestructura - Servicios específicos de Auth (DiceBear)
+	avatarService := authInfra.NewDiceBearService()
 
 	// Repository compartido
 	userRepo := userInfra.NewUserRepository(database.DB)

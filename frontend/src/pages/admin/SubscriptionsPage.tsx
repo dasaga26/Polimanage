@@ -7,8 +7,9 @@ import { SubscriptionsTable } from '@/components/admin/subscriptions/Subscriptio
 
 export default function SubscriptionsPage() {
     const { data: memberships = [], isLoading: loadingMemberships, error } = useSubscriptionsQuery();
-    const { data: clubs = [], isLoading: loadingClubs } = useClubsQuery();
+    const { data: clubsData, isLoading: loadingClubs } = useClubsQuery({ limit: 1000 });
 
+    const clubs = clubsData?.data || [];
     const isLoading = loadingMemberships || loadingClubs;
 
     if (isLoading) {

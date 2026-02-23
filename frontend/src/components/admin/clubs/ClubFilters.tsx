@@ -18,9 +18,8 @@ export function ClubFilters({ searchTerm, statusFilter, onSearchChange, onStatus
           onChange={onStatusChange}
           options={[
             { value: 'all', label: 'Todos los estados' },
-            { value: 'ACTIVE', label: 'Activos' },
-            { value: 'INACTIVE', label: 'Inactivos' },
-            { value: 'FULL', label: 'Completos' },
+            { value: 'active', label: 'Activos' },
+            { value: 'inactive', label: 'Inactivos' },
           ]}
         />
       </div>

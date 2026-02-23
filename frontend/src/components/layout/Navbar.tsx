@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Menu, X, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
@@ -19,6 +20,7 @@ export const Navbar = () => {
   const handleLogout = () => {
     logout();
     setIsMenuOpen(false);
+    navigate('/');
   };
 
   return (

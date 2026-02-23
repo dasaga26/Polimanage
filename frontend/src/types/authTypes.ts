@@ -50,6 +50,12 @@ export interface RefreshResponse {
   accessToken: string;
 }
 
+// Callbacks para login/register
+export interface AuthCallbacks {
+  onSuccess?: () => void;
+  onError?: (error: any) => void;
+}
+
 export interface AuthContextType {
   user: User | null;
   token: string | null; // Access token
@@ -57,10 +63,9 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   errorMSG: string | null;
-  useLogin: (credentials: LoginCredentials) => Promise<void>;
-  useRegister: (data: RegisterData) => Promise<void>;
+  useLogin: (credentials: LoginCredentials, callbacks?: AuthCallbacks) => Promise<void>;
+  useRegister: (data: RegisterData, callbacks?: AuthCallbacks) => Promise<void>;
   logout: () => void;
   logoutAll: () => Promise<void>; // V2: Logout global
   refreshToken: () => Promise<void>;
-  isCorrect: boolean;
 }

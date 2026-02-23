@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"backend-go/features/classes/domain"
 	"backend-go/shared/database"
+	"backend-go/shared/pagination"
 	"errors"
 	"fmt"
 	"regexp"
@@ -387,4 +388,103 @@ func (r *ClassRepositoryImpl) UpdateStatus(id int, newStatus string) error {
 		Where("id = ?", id).
 		Update("status", newStatus).
 		Error
+}
+
+// FindAllPaginated implementa paginación usando la estructura compartida PaginationParams
+func (r *ClassRepositoryImpl) FindAllPaginated(params pagination.PaginationParams) ([]domain.Class, *pagination.PaginationMeta, error) {
+	// Validar parámetros
+	params.Validate()
+
+	// Inicializar query base con relaciones
+	query := r.db.Model(&database.Class{}).
+		Preload("Pista").
+		Preload("Instructor").
+		Preload("Enrollments.User")
+
+	// 1. BÚSQUEDA (Search): texto libre en título
+	if params.Search != "" {
+		searchPattern := "%" + params.Search + "%"
+		query = query.Where("title ILIKE ?", searchPattern)
+	}
+
+	// 2. FILTROS
+	// Filtro por deporte (a través de la pista)
+	if params.Deporte != "" {
+		query = query.Joins("JOIN pistas ON pistas.id = classes.pista_id").
+			Where("pistas.type = ?", params.Deporte)
+	}
+
+	// Filtro por precio mínimo (en céntimos)
+	if params.MinPrice > 0 {
+		query = query.Where("price_cents >= ?", params.MinPrice)
+	}
+
+	// Filtro por precio máximo (en céntimos)
+	if params.MaxPrice > 0 {
+		query = query.Where("price_cents <= ?", params.MaxPrice)
+	}
+
+	// Filtro por estado (si se proporciona)
+	if params.Status != "" {
+		query = query.Where("status = ?", params.Status)
+	}
+
+	// 3. CONTAR TOTAL antes de paginación
+	var totalItems int64
+	if err := query.Count(&totalItems).Error; err != nil {
+		return nil, nil, err
+	}
+
+	// 4. CALCULAR MAX PRICE LIMIT
+	// Obtener el precio máximo de TODA la tabla de clases (respetando filtro de deporte, pero ignorando filtros de precio)
+	var maxPrice int
+	maxPriceQuery := r.db.Model(&database.Class{})
+	if params.Deporte != "" {
+		maxPriceQuery = maxPriceQuery.Joins("JOIN pistas ON pistas.id = classes.pista_id").
+			Where("pistas.type = ?", params.Deporte)
+	}
+	if err := maxPriceQuery.Select("COALESCE(MAX(price_cents), 0)").Scan(&maxPrice).Error; err != nil {
+		return nil, nil, err
+	}
+
+	// 5. ORDENACIÓN (Sort)
+	switch params.Sort {
+	case "precio_asc":
+		query = query.Order("price_cents ASC")
+	case "precio_desc":
+		query = query.Order("price_cents DESC")
+	case "fecha_asc":
+		query = query.Order("start_time ASC")
+	case "fecha_desc":
+		query = query.Order("start_time DESC")
+	default:
+		// Default: Próximas clases primero
+		query = query.Order("start_time ASC")
+	}
+
+	// 6. PAGINACIÓN
+	offset := params.GetOffset()
+	query = query.Limit(params.Limit).Offset(offset)
+
+	// 7. EJECUTAR QUERY
+	var models []database.Class
+	if err := query.Find(&models).Error; err != nil {
+		return nil, nil, err
+	}
+
+	// 8. MAPPING a Domain Entities
+	classes := make([]domain.Class, len(models))
+	for i, model := range models {
+		classes[i] = *ToEntity(&model)
+	}
+
+	// 9. CONSTRUIR METADATOS
+	meta := pagination.NewPaginationMeta(totalItems, params.Page, params.Limit)
+	meta.MaxPriceLimit = &maxPrice
+
+	// Convertir a euros para comodidad del frontend
+	maxPriceEur := float64(maxPrice) / 100.0
+	meta.MaxPriceLimitEur = &maxPriceEur
+
+	return classes, meta, nil
 }

@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/google/uuid"
+import (
+	"backend-go/shared/pagination"
+
+	"github.com/google/uuid"
+)
 
 // ======================================================================================
 // INTERFAZ DE REPOSITORIO (DOMINIO)
@@ -14,6 +18,9 @@ type UserRepository interface {
 	GetByEmail(email string) (*User, error)
 	GetBySlug(slug string) (*User, error)
 	GetByRole(roleID uint) ([]User, error)
+
+	// Consultas paginadas
+	FindAllPaginated(params pagination.PaginationParams) ([]User, *pagination.PaginationMeta, error)
 
 	// Comandos
 	Create(user *User) error

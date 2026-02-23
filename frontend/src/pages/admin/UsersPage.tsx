@@ -1,35 +1,29 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useUsersQuery } from '@/queries';
 import { UsersManager } from '@/components/admin/users/UsersManager';
 
 export default function UsersPage() {
-  const { data: users = [], isLoading } = useUsersQuery();
-
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [page, setPage] = useState(1);
 
-  const filteredUsers = useMemo(() => {
-    let result = users;
+  // Debounce para la búsqueda
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      result = result.filter(
-        (u) =>
-          u.fullName?.toLowerCase().includes(search) ||
-          u.email?.toLowerCase().includes(search) ||
-          u.roleName?.toLowerCase().includes(search) ||
-          u.phone?.toLowerCase().includes(search)
-      );
-    }
+  // Query con paginación del servidor
+  const { data, isLoading } = useUsersQuery({
+    page,
+    limit: 10,
+    search: debouncedSearch,
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+    sort: 'recientes',
+  });
 
-    if (statusFilter === 'active') {
-      result = result.filter((u) => u.isActive);
-    } else if (statusFilter === 'inactive') {
-      result = result.filter((u) => !u.isActive);
-    }
-
-    return result;
-  }, [users, searchTerm, statusFilter]);
+  // Extraer datos de la respuesta paginada
+  const users = data?.data || [];
+  const totalPages = data?.meta?.totalPages || 1;
+  const totalUsers = data?.meta?.totalItems || 0;
 
   if (isLoading) {
     return (
@@ -44,11 +38,15 @@ export default function UsersPage() {
 
   return (
     <UsersManager 
-      users={filteredUsers}
+      users={users}
+      totalUsers={totalUsers}
+      currentPage={page}
+      totalPages={totalPages}
       searchTerm={searchTerm}
       statusFilter={statusFilter}
       onSearchChange={setSearchTerm}
       onStatusChange={setStatusFilter}
+      onPageChange={setPage}
     />
   );
 }

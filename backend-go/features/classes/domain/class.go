@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"backend-go/shared/pagination"
 	"time"
 
 	"github.com/google/uuid"
@@ -59,6 +60,7 @@ type ClassRepository interface {
 	FindBySlug(slug string) (*Class, error)
 	FindByInstructor(instructorID int) ([]Class, error)
 	FindByPistaAndTimeRange(pistaID int, startTime, endTime time.Time) ([]Class, error)
+	FindAllPaginated(params pagination.PaginationParams) ([]Class, *pagination.PaginationMeta, error)
 	Create(class *Class) error
 	Update(class *Class) error
 	Delete(id int) error

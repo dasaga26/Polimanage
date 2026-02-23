@@ -1,5 +1,6 @@
 import type { User } from '@/services/userService';
 import type { Pista } from '@/services/pistaService';
+import type { PaginationParams } from './pagination';
 
 // Enrollment de un alumno en una clase
 export interface ClassEnrollment {
@@ -52,4 +53,12 @@ export interface CreateClassDTO {
   endTime: string; // ISO 8601
   status?: 'OPEN' | 'FULL' | 'CANCELLED' | 'COMPLETED';
   isActive?: boolean;
+}
+
+/**
+ * Parámetros de query para filtrar y paginar clases
+ * Extiende PaginationParams con campos específicos de clases
+ */
+export interface ClassQueryParams extends PaginationParams {
+  // Hereda: page, limit, search, sort, status, deporte, min_price, max_price
 }

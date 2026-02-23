@@ -6,7 +6,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { authService } from '../services/authService';
-import type { User, LoginCredentials, RegisterData, AuthContextType } from '../types/authTypes';
+import type { User, LoginCredentials, RegisterData, AuthContextType, AuthCallbacks } from '../types/authTypes';
 import { v4 as uuidv4 } from 'uuid';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,7 +24,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [deviceId, setDeviceId] = useState<string | null>(null); // V2
   const [isLoading, setIsLoading] = useState(true);
   const [errorMSG, setErrorMSG] = useState<string | null>(null);
-  const [isCorrect, setIsCorrect] = useState(false);
 
   // ============================================================
   // V2: INICIALIZAR DEVICE ID
@@ -74,11 +73,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // ============================================================
   // LOGIN - Autenticar usuario (V2)
   // ============================================================
-  const useLogin = async (credentials: LoginCredentials): Promise<void> => {
+  const useLogin = async (credentials: LoginCredentials, callbacks?: AuthCallbacks): Promise<void> => {
     try {
       setIsLoading(true);
       setErrorMSG(null);
-      setIsCorrect(false);
 
       // V2: Enviar deviceId si ya existe
       const loginData = {
@@ -92,7 +90,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem(TOKEN_KEY, response.accessToken);
       setToken(response.accessToken);
       setUser(response.user);
-      setIsCorrect(true);
 
       // V2: Actualizar deviceId si el backend retornó uno nuevo
       if (response.deviceId) {
@@ -101,12 +98,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       console.log('✅ Login exitoso:', response.user.email);
+      
+      // Ejecutar callback de éxito si existe
+      callbacks?.onSuccess?.();
     } catch (error: any) {
       console.error('❌ Error en login:', error);
       
       const message = error.response?.data?.error || 'Error al iniciar sesión';
       setErrorMSG(message);
-      setIsCorrect(false);
+      
+      // Ejecutar callback de error si existe
+      callbacks?.onError?.(error);
       
       throw error;
     } finally {
@@ -115,29 +117,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // ============================================================
-  // REGISTER - Crear nueva cuenta
+  // REGISTER - Crear nueva cuenta (NO auto-loguear)
   // ============================================================
-  const useRegister = async (data: RegisterData): Promise<void> => {
+  const useRegister = async (data: RegisterData, callbacks?: AuthCallbacks): Promise<void> => {
     try {
       setIsLoading(true);
       setErrorMSG(null);
-      setIsCorrect(false);
 
       const response = await authService.register(data);
 
-      // V2: Guardar access token en localStorage
-      localStorage.setItem(TOKEN_KEY, response.accessToken);
-      setToken(response.accessToken);
-      setUser(response.user);
-      setIsCorrect(true);
-
+      // NO guardamos token ni actualizamos estado - el usuario debe hacer login manualmente
       console.log('✅ Registro exitoso:', response.user.email);
+      
+      // Ejecutar callback de éxito si existe
+      callbacks?.onSuccess?.();
     } catch (error: any) {
       console.error('❌ Error en registro:', error);
       
       const message = error.response?.data?.error || 'Error al crear cuenta';
       setErrorMSG(message);
-      setIsCorrect(false);
+      
+      // Ejecutar callback de error si existe
+      callbacks?.onError?.(error);
       
       throw error;
     } finally {
@@ -164,7 +165,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Limpiar estado
       setToken(null);
       setUser(null);
-      setIsCorrect(false);
       setErrorMSG(null);
 
       console.log('✅ Logout exitoso');
@@ -193,7 +193,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setToken(null);
       setUser(null);
       setDeviceId(null);
-      setIsCorrect(false);
       setErrorMSG(null);
 
       // Generar nuevo deviceId
@@ -245,7 +244,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     logoutAll, // V2
     refreshToken,
-    isCorrect,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

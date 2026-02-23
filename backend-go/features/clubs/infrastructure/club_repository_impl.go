@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"backend-go/features/clubs/domain"
 	"backend-go/shared/database"
+	"backend-go/shared/pagination"
 	"errors"
 
 	"gorm.io/gorm"
@@ -102,6 +103,72 @@ func (r *ClubRepositoryImpl) CountMembers(clubID int) (int, error) {
 		Where("club_id = ? AND is_active = ?", clubID, true).
 		Count(&count).Error
 	return int(count), err
+}
+
+// FindAllPaginated obtiene clubs con paginación y filtros
+func (r *ClubRepositoryImpl) FindAllPaginated(params pagination.PaginationParams) ([]domain.Club, *pagination.PaginationMeta, error) {
+	var models []database.Club
+	var totalItems int64
+
+	// Query base con Preload
+	query := r.db.Model(&database.Club{}).Preload("Owner")
+
+	// 1. Filtro de búsqueda (nombre, descripción)
+	if params.Search != "" {
+		searchPattern := "%" + params.Search + "%"
+		query = query.Where("name ILIKE ? OR description ILIKE ?", searchPattern, searchPattern)
+	}
+
+	// 2. Filtro por estado (status: active/inactive)
+	if params.Status != "" {
+		switch params.Status {
+		case "active":
+			query = query.Where("is_active = ?", true)
+		case "inactive":
+			query = query.Where("is_active = ?", false)
+		}
+	}
+
+	// 3. Contar total de items (después de aplicar filtros)
+	if err := query.Count(&totalItems).Error; err != nil {
+		return nil, nil, err
+	}
+
+	// 4. Ordenación
+	switch params.Sort {
+	case "nombre_asc":
+		query = query.Order("name ASC")
+	case "nombre_desc":
+		query = query.Order("name DESC")
+	case "recientes":
+		query = query.Order("created_at DESC")
+	default:
+		query = query.Order("created_at DESC")
+	}
+
+	// 5. Aplicar paginación
+	offset := params.GetOffset()
+	query = query.Limit(params.Limit).Offset(offset)
+
+	// 6. Ejecutar query
+	if err := query.Find(&models).Error; err != nil {
+		return nil, nil, err
+	}
+
+	// 7. Mapear a dominio
+	clubs := make([]domain.Club, len(models))
+	for i, model := range models {
+		clubs[i] = *ToEntity(&model)
+	}
+
+	// 8. Construir metadata
+	meta := pagination.NewPaginationMeta(
+		totalItems,
+		params.Page,
+		params.Limit,
+	)
+
+	return clubs, meta, nil
 }
 
 // ToEntity convierte un modelo GORM a entidad de dominio

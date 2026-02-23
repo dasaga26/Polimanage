@@ -3,6 +3,7 @@ import { DataTable } from '../DataTable';
 import { Plus } from 'lucide-react';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { StatusFilter } from '@/components/ui/StatusFilter';
+import { Pagination } from '@/components/public/shop/Pagination';
 import { showSuccess, showServerError, showConfirm } from '@/lib/alerts';
 import { useCreateUser, useUpdateUser, useDeleteUser } from '@/mutations';
 import type { User, CreateUserDTO, UpdateUserDTO } from '@/services/userService';
@@ -10,13 +11,27 @@ import { UserModal } from '../modals/UserModal';
 
 interface UsersManagerProps {
   users: User[];
+  totalUsers: number;
+  currentPage: number;
+  totalPages: number;
   searchTerm: string;
   statusFilter: string;
   onSearchChange: (value: string) => void;
   onStatusChange: (value: string) => void;
+  onPageChange: (page: number) => void;
 }
 
-export function UsersManager({ users, searchTerm, statusFilter, onSearchChange, onStatusChange }: UsersManagerProps) {
+export function UsersManager({ 
+  users, 
+  totalUsers,
+  currentPage,
+  totalPages,
+  searchTerm, 
+  statusFilter, 
+  onSearchChange, 
+  onStatusChange,
+  onPageChange,
+}: UsersManagerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   
@@ -117,7 +132,9 @@ export function UsersManager({ users, searchTerm, statusFilter, onSearchChange, 
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Usuarios</h1>
-          <p className="text-gray-600 mt-1">Gestión de usuarios del sistema</p>
+          <p className="text-gray-600 mt-1">
+            {totalUsers} {totalUsers === 1 ? 'usuario' : 'usuarios'} en total
+          </p>
         </div>
         <button
           onClick={() => {
@@ -155,6 +172,17 @@ export function UsersManager({ users, searchTerm, statusFilter, onSearchChange, 
         onDelete={handleDelete}
         loading={false}
       />
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <div className="mt-6">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
 
       {isModalOpen && (
         <UserModal

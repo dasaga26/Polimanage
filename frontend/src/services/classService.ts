@@ -1,10 +1,25 @@
 import { apiGo } from './api';
-import type { Class, CreateClassDTO } from '@/types/classTypes';
+import type { Class, CreateClassDTO, ClassQueryParams } from '@/types/classTypes';
+import type { PaginatedResponse } from '@/types/pagination';
 
 export const classService = {
-  // Obtener todas las clases
-  getAll: async (): Promise<Class[]> => {
-    const { data } = await apiGo.get<Class[]>('/classes');
+  // Obtener todas las clases con paginación y filtros
+  getAll: async (params?: ClassQueryParams): Promise<PaginatedResponse<Class>> => {
+    const searchParams = new URLSearchParams();
+    
+    if (params?.page) searchParams.set('page', String(params.page));
+    if (params?.limit) searchParams.set('limit', String(params.limit));
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.sort) searchParams.set('sort', params.sort);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.deporte) searchParams.set('deporte', params.deporte);
+    if (params?.min_price !== undefined) searchParams.set('min_price', String(params.min_price));
+    if (params?.max_price !== undefined) searchParams.set('max_price', String(params.max_price));
+
+    const queryString = searchParams.toString();
+    const url = queryString ? `/classes?${queryString}` : '/classes';
+    
+    const { data } = await apiGo.get<PaginatedResponse<Class>>(url);
     return data;
   },
 

@@ -1,37 +1,41 @@
 package infrastructure
 
 import (
-	"crypto/md5"
 	"fmt"
+	"math/rand"
+	"net/url"
+	"time"
 )
 
 // ======================================================================================
-// IMPLEMENTACIÓN DE AVATARSERVICE CON PRAVATAR.CC (INFRAESTRUCTURA)
+// IMPLEMENTACIÓN DE AVATARSERVICE CON DICEBEAR.COM (INFRAESTRUCTURA)
 // ======================================================================================
 
-type PravatarService struct {
+type DiceBearService struct {
 	baseURL string
+	style   string
 }
 
-// NewPravatarService crea una nueva instancia del servicio de avatares
-func NewPravatarService() *PravatarService {
-	return &PravatarService{
-		baseURL: "https://i.pravatar.cc",
+// NewDiceBearService crea una nueva instancia del servicio de avatares
+func NewDiceBearService() *DiceBearService {
+	return &DiceBearService{
+		baseURL: "https://api.dicebear.com/7.x",
+		style:   "avataaars", // Estilo de avatar (puede ser: avataaars, bottts, personas, initials, etc.)
 	}
 }
 
 // GetRandomAvatar obtiene una URL de avatar aleatorio
-func (s *PravatarService) GetRandomAvatar() (string, error) {
-	return fmt.Sprintf("%s/150?img=%d", s.baseURL, 1), nil
+func (s *DiceBearService) GetRandomAvatar() (string, error) {
+	// Generar una semilla aleatoria para obtener un avatar único
+	rand.Seed(time.Now().UnixNano())
+	seed := rand.Intn(1000000)
+	return fmt.Sprintf("%s/%s/svg?seed=%d", s.baseURL, s.style, seed), nil
 }
 
-// GetAvatarByEmail genera un avatar determinístico basado en el email (MD5 hash)
-func (s *PravatarService) GetAvatarByEmail(email string) (string, error) {
-	// Generar hash MD5 del email para obtener un número determinístico
-	hash := md5.Sum([]byte(email))
-
-	// Convertir los primeros 4 bytes a un número entre 1 y 70 (pravatar tiene 70 avatares)
-	num := (uint32(hash[0])<<24|uint32(hash[1])<<16|uint32(hash[2])<<8|uint32(hash[3]))%70 + 1
-
-	return fmt.Sprintf("%s/150?img=%d", s.baseURL, num), nil
+// GetAvatarByEmail genera un avatar determinístico basado en el email
+func (s *DiceBearService) GetAvatarByEmail(email string) (string, error) {
+	// Usar el email como seed para generar un avatar determinístico
+	// URL encode del email para evitar problemas con caracteres especiales
+	encodedEmail := url.QueryEscape(email)
+	return fmt.Sprintf("%s/%s/svg?seed=%s", s.baseURL, s.style, encodedEmail), nil
 }

@@ -1,10 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { classService } from '@/services/classService';
+import type { ClassQueryParams } from '@/types/classTypes';
 
-export const useClassesQuery = () => {
+/**
+ * Hook para obtener clases con paginación y filtros
+ * @param params Parámetros de paginación y filtros
+ */
+export const useClassesQuery = (params?: ClassQueryParams) => {
   return useQuery({
-    queryKey: ['classes'],
-    queryFn: () => classService.getAll(),
+    queryKey: ['classes', params],
+    queryFn: () => classService.getAll(params),
+    staleTime: 30000, // 30 segundos
   });
 };
 

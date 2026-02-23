@@ -61,7 +61,7 @@ authChannel.onmessage = (event) => {
     // Otra pestaña hizo logout
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(DEVICE_ID_KEY);
-    window.location.href = '/login';
+    window.location.href = '/';
   }
 };
 
@@ -92,15 +92,21 @@ apiGo.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
+    // Si el 401 viene del endpoint de login o register, no hagas nada,
+    // simplemente devuelve el error al catch del componente.
+    if (originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/register')) {
+      return Promise.reject(error);
+    }
+
     // Si es error 401 y NO es el endpoint de refresh
     if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh')) {
       // ¿Ya intentamos refrescar este request?
       if (originalRequest._retry) {
-        // Ya se intentó, redirigir a login
+        // Ya se intentó, redirigir al home
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(DEVICE_ID_KEY);
         authChannel.postMessage({ type: 'LOGOUT' });
-        window.location.href = '/login';
+        window.location.href = '/';
         return Promise.reject(error);
       }
 
@@ -152,7 +158,7 @@ apiGo.interceptors.response.use(
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(DEVICE_ID_KEY);
         authChannel.postMessage({ type: 'LOGOUT' });
-        window.location.href = '/login';
+        window.location.href = '/';
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

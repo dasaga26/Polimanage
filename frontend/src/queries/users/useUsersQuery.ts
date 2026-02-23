@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { userService } from '@/services/userService';
+import { userService, type UserQueryParams } from '@/services/userService';
 
-export const useUsersQuery = (roleId?: number) => {
+export const useUsersQuery = (params?: UserQueryParams) => {
   return useQuery({
-    queryKey: roleId ? ['users', 'role', roleId] : ['users'],
-    queryFn: () => userService.getAll(roleId),
+    queryKey: ['users', params],
+    queryFn: () => userService.getAll(params),
+    staleTime: 30000,
   });
 };
 

@@ -2,6 +2,7 @@ package application
 
 import (
 	"backend-go/features/clubs/domain"
+	"backend-go/shared/pagination"
 	"errors"
 	"fmt"
 	"regexp"
@@ -36,6 +37,24 @@ func (s *ClubService) GetAllClubs() ([]domain.Club, error) {
 	}
 
 	return clubs, nil
+}
+
+// GetAllPaginated obtiene clubs con paginación
+func (s *ClubService) GetAllPaginated(params pagination.PaginationParams) (*pagination.PaginatedResponse, error) {
+	items, meta, err := s.repo.FindAllPaginated(params)
+	if err != nil {
+		return nil, err
+	}
+
+	// Cargar contador de miembros para cada club
+	for i := range items {
+		count, err := s.membershipRepo.Count(items[i].ID)
+		if err == nil {
+			items[i].MemberCount = count
+		}
+	}
+
+	return pagination.NewPaginatedResponse(items, meta), nil
 }
 
 // GetClubByID obtiene un club por ID

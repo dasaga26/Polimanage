@@ -2,7 +2,8 @@ import { usePistas } from '../../queries/usePistas';
 import { PistaCard } from './PistaCard';
 
 export const PistasList = () => {
-    const { data: pistas, isLoading, isError, error } = usePistas();
+    const { data, isLoading, isError, error } = usePistas();
+    const pistas = data?.data || [];
 
     if (isLoading) {
         return (

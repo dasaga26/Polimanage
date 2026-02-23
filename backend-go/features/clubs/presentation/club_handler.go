@@ -3,6 +3,7 @@ package presentation
 import (
 	"backend-go/features/clubs/application"
 	"backend-go/features/clubs/domain"
+	"backend-go/shared/pagination"
 	"net/url"
 	"strconv"
 
@@ -34,20 +35,46 @@ func NewClubHandler(
 // @Summary Lista todos los clubs
 // @Tags Clubs
 // @Produce json
-// @Success 200 {array} ClubResponse
+// @Param page query int false "Número de página"
+// @Param limit query int false "Elementos por página"
+// @Param search query string false "Búsqueda por nombre o descripción"
+// @Param status query string false "Filtrar por estado (active/inactive)"
+// @Param sort query string false "Ordenación (nombre_asc, nombre_desc, recientes)"
+// @Success 200 {object} pagination.PaginatedResponse
 // @Router /clubs [get]
 func (h *ClubHandler) GetAll(c *fiber.Ctx) error {
-	clubs, err := h.service.GetAllClubs()
+	// Parsear parámetros de paginación
+	var params pagination.PaginationParams
+	if err := c.QueryParser(&params); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Parámetros inválidos"})
+	}
+
+	// Valores por defecto
+	if params.Page < 1 {
+		params.Page = 1
+	}
+	if params.Limit < 1 {
+		params.Limit = 10
+	}
+
+	// Obtener clubs paginados
+	response, err := h.service.GetAllPaginated(params)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	responses := make([]ClubResponse, len(clubs))
-	for i, club := range clubs {
-		responses[i] = ClubToResponse(&club)
+	// Serializar clubs
+	clubs := response.Data.([]domain.Club)
+	clubsResponse := make([]ClubResponse, len(clubs))
+	for i := range clubs {
+		clubsResponse[i] = ClubToResponse(&clubs[i])
 	}
 
-	return c.JSON(responses)
+	// Retornar respuesta paginada
+	return c.JSON(pagination.PaginatedResponse{
+		Data: clubsResponse,
+		Meta: response.Meta,
+	})
 }
 
 // GetBySlug maneja GET /clubs/:slug

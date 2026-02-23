@@ -3,6 +3,7 @@ package application
 import (
 	"backend-go/features/classes/domain"
 	"backend-go/shared/availability"
+	"backend-go/shared/pagination"
 	"errors"
 	"fmt"
 	"time"
@@ -25,6 +26,16 @@ func NewClassService(repo domain.ClassRepository, availabilityService *availabil
 // GetAllClasses obtiene todas las clases
 func (s *ClassService) GetAllClasses() ([]domain.Class, error) {
 	return s.repo.FindAll()
+}
+
+// GetAllPaginated obtiene clases con paginación usando la estructura compartida
+func (s *ClassService) GetAllPaginated(params pagination.PaginationParams) (*pagination.PaginatedResponse, error) {
+	classes, meta, err := s.repo.FindAllPaginated(params)
+	if err != nil {
+		return nil, err
+	}
+
+	return pagination.NewPaginatedResponse(classes, meta), nil
 }
 
 // GetClassByID obtiene una clase por ID

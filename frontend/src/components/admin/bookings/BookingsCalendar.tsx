@@ -21,7 +21,8 @@ import type { Booking, CreateBookingData } from '@/services/bookingService';
 
 export function BookingsCalendar() {
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const { data: pistas, isLoading: pistasLoading } = usePistasQuery();
+    const { data: pistasData, isLoading: pistasLoading } = usePistasQuery({ limit: 1000 });
+    const pistas = pistasData?.data || [];
     const [enrollmentManagerProps, setEnrollmentManagerProps] = useState<EnrollmentManagerModalProps | null>(null);
     
     // Drag to scroll
@@ -365,7 +366,7 @@ export function BookingsCalendar() {
                                 <td className="px-4 py-3 text-sm text-gray-600 font-medium sticky left-0 bg-white z-20 border-r border-gray-200">
                                     {hour}:00
                                 </td>
-                                {pistas?.map((pista) => (
+                                {pistas.map((pista) => (
                                     <BookingCell
                                         key={`${pista.id}-${hour}`}
                                         pistaId={pista.id}
@@ -389,7 +390,7 @@ export function BookingsCalendar() {
                     open={true}
                     onClose={handleCloseModals}
                     onSelectType={handleTypeSelect}
-                    pistaName={pistas?.find(p => p.id === selectedCell.pistaId)?.nombre || ''}
+                    pistaName={pistas.find(p => p.id === selectedCell.pistaId)?.nombre || ''}
                     dateTime={`${selectedDate.toLocaleDateString('es-ES')} ${selectedCell.hour}:00`}
                 />
             )}

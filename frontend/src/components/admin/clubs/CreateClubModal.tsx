@@ -19,7 +19,9 @@ interface CreateClubModalProps {
 
 export function CreateClubModal({ isOpen, onClose }: CreateClubModalProps) {
     const createMutation = useCreateClub();
-    const { data: clubOwners = [] } = useUsersQuery(3); // Filtrar solo usuarios con rol CLUB
+    const { data: usersData } = useUsersQuery({ limit: 1000 });
+    // Filtrar solo usuarios con rol CLUB (roleId = 3)
+    const clubOwners = (usersData?.data || []).filter(u => u.roleId === 3);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {

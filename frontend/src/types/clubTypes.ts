@@ -1,3 +1,5 @@
+import type { PaginationParams } from './pagination';
+
 export type ClubStatus = 'ACTIVE' | 'INACTIVE' | 'FULL';
 
 export interface Club {
@@ -17,6 +19,12 @@ export interface Club {
   memberCount: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ClubQueryParams extends PaginationParams {
+  search?: string;
+  status?: 'active' | 'inactive';
+  sort?: 'nombre_asc' | 'nombre_desc' | 'recientes';
 }
 
 export interface CreateClubData {

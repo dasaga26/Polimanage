@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { clubService } from '@/services/clubService';
 import { publicClubService } from '@/services/publicClubService';
+import type { ClubQueryParams } from '@/types/clubTypes';
 
-export function useClubsQuery() {
+export function useClubsQuery(params?: ClubQueryParams) {
   return useQuery({
-    queryKey: ['clubs'],
-    queryFn: clubService.getAll,
+    queryKey: ['clubs', params],
+    queryFn: () => clubService.getAll(params),
+    staleTime: 30000,
   });
 }
 

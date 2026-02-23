@@ -66,5 +66,7 @@ func (m *UserMapper) ToDatabase(domainUser *domain.User) *database.User {
 		IsActive:         domainUser.IsActive,
 		SessionVersion:   domainUser.SessionVersion, // V2
 		LastLoginAt:      domainUser.LastLoginAt,
+		CreatedAt:        domainUser.CreatedAt,
+		UpdatedAt:        domainUser.UpdatedAt,
 	}
 }

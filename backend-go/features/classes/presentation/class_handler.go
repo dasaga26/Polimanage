@@ -3,6 +3,7 @@ package presentation
 import (
 	"backend-go/features/classes/application"
 	"backend-go/features/classes/domain"
+	"backend-go/shared/pagination"
 	"net/url"
 	"strconv"
 
@@ -19,23 +20,52 @@ func NewClassHandler(service *application.ClassService) *ClassHandler {
 }
 
 // GetAll maneja GET /classes
-// @Summary Listar todas las clases
+// @Summary Listar clases con paginación y filtros
 // @Tags classes
 // @Produce json
-// @Success 200 {array} ClassResponse
+// @Param search query string false "Búsqueda por título"
+// @Param deporte query string false "Filtro por tipo de deporte"
+// @Param min_price query int false "Precio mínimo (en céntimos)"
+// @Param max_price query int false "Precio máximo (en céntimos)"
+// @Param status query string false "Filtro por estado (OPEN, IN_PROGRESS, COMPLETED, CANCELLED)"
+// @Param sort query string false "Ordenación: precio_asc, precio_desc, fecha_asc, fecha_desc"
+// @Param page query int false "Número de página" default(1)
+// @Param limit query int false "Items por página" default(6)
+// @Success 200 {object} pagination.PaginatedResponse
 // @Router /api/classes [get]
 func (h *ClassHandler) GetAll(c *fiber.Ctx) error {
-	classes, err := h.service.GetAllClasses()
+	// Parsear query params usando la estructura compartida
+	var params pagination.PaginationParams
+	if err := c.QueryParser(&params); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Parámetros inválidos"})
+	}
+
+	// Aplicar defaults si no se especifican
+	if params.Page < 1 {
+		params.Page = 1
+	}
+	if params.Limit < 1 {
+		params.Limit = 6
+	}
+
+	// Llamar al servicio con paginación
+	response, err := h.service.GetAllPaginated(params)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	responses := make([]ClassResponse, len(classes))
-	for i, class := range classes {
-		responses[i] = ToResponse(&class)
+	// Convertir domain entities a presentation DTOs
+	classesData := response.Data.([]domain.Class)
+	classesResponse := make([]ClassResponse, len(classesData))
+	for i, class := range classesData {
+		classesResponse[i] = ToResponse(&class)
 	}
 
-	return c.JSON(responses)
+	// Devolver respuesta paginada con DTOs
+	return c.JSON(pagination.PaginatedResponse{
+		Data: classesResponse,
+		Meta: response.Meta,
+	})
 }
 
 // GetByID maneja GET /classes/:slug
