@@ -104,7 +104,7 @@ function App() {
           }
         />
 
-        {/* Admin Routes - Solo ADMIN puede acceder */
+        {/* Admin Routes - Solo ADMIN puede acceder */}
         <Route path="/admin" element={<GuardAdmin><DashboardLayout><Dashboard /></DashboardLayout></GuardAdmin>} />
         <Route path="/admin/bookings" element={<GuardAdmin><DashboardLayout><BookingsPage /></DashboardLayout></GuardAdmin>} />
         <Route path="/admin/pistas" element={<GuardAdmin><DashboardLayout><PistasPage /></DashboardLayout></GuardAdmin>} />
