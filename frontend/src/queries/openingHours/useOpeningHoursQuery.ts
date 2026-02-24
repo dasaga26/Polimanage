@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { openingHourService } from '@/services/otherServices';
-import type { OpeningHour } from '@/types/admin';
+import { openingHoursService } from '@/services/otherServices';
 
 export const useOpeningHoursQuery = () => {
-  return useQuery<OpeningHour[], Error>({
+  return useQuery({
     queryKey: ['opening-hours'],
-    queryFn: () => openingHourService.getAll(),
+    queryFn: () => openingHoursService.get(),
+    staleTime: 5 * 60_000, // 5 minutos
   });
 };

@@ -42,10 +42,10 @@ export const classService = {
 
   // Obtener clases de una pista en una fecha específica
   getByPistaAndDate: async (pistaId: number, date: string): Promise<Class[]> => {
-    // Backend Go no tiene este endpoint, simular filtrando getAll por ahora
-    // TODO: Implementar endpoint /classes/pista/${pistaId}/date/${date}
-    const { data } = await apiGo.get<Class[]>('/classes');
-    return data.filter(c => {
+    // El endpoint devuelve una respuesta paginada; pedimos limit alto para obtener todas las del día
+    const { data: response } = await apiGo.get<PaginatedResponse<Class>>('/classes?limit=1000');
+    const classes = response?.data ?? [];
+    return classes.filter(c => {
       if (c.pistaId !== pistaId) return false;
       const classDate = new Date(c.startTime).toISOString().split('T')[0];
       return classDate === date && c.status !== 'CANCELLED';

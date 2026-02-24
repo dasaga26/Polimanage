@@ -22,8 +22,8 @@ export default function ShopPage() {
     limit: 6,
     search: debouncedSearch,
     deporte: filters.deporte || undefined,
-    min_price: filters.minPrice ? parseInt(filters.minPrice) : undefined,
-    max_price: filters.maxPrice ? parseInt(filters.maxPrice) : undefined,
+    min_price: filters.minPrice ? parseInt(filters.minPrice) * 100 : undefined,
+    max_price: filters.maxPrice ? parseInt(filters.maxPrice) * 100 : undefined,
     sort: filters.sort && filters.sort !== 'recientes' ? filters.sort : undefined,
   });
 

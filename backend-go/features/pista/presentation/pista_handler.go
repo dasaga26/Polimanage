@@ -115,8 +115,6 @@ func (h *PistaHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
-	// TODO: Validar con validator
-
 	// Mapear a entidad de dominio
 	pista := RequestToDomain(&req)
 
@@ -156,8 +154,6 @@ func (h *PistaHandler) Update(c *fiber.Ctx) error {
 			"error": "Datos inválidos",
 		})
 	}
-
-	// TODO: Validar con validator
 
 	// Mapear a entidad de dominio
 	pista := UpdateRequestToDomain(&req)

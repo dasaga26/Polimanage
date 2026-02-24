@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { paymentService } from '@/services/otherServices';
+import { paymentsService } from '@/services/otherServices';
 
-export const usePaymentsQuery = () => {
+export const usePaymentsQuery = (params?: { page?: number; limit?: number }) => {
   return useQuery({
-    queryKey: ['payments'],
-    queryFn: () => paymentService.getAll(),
+    queryKey: ['payments', params],
+    queryFn: () => paymentsService.getAll(params),
+    staleTime: 30_000,
   });
 };

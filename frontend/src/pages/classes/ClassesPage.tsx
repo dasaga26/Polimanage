@@ -26,7 +26,7 @@ export default function ClassesPage() {
     min_price: filters.minPrice ? parseInt(filters.minPrice) * 100 : undefined,
     max_price: filters.maxPrice ? parseInt(filters.maxPrice) * 100 : undefined,
     sort: filters.sort && filters.sort !== 'recientes' ? filters.sort : undefined,
-    status: 'active',
+    // Sin filtro de status: el backend devuelve todas las clases (OPEN, FULL, etc.)
   });
 
   // Extraer datos de la respuesta paginada

@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { Menu, X, User, LogOut } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export const Navbar = () => {
@@ -14,7 +14,8 @@ export const Navbar = () => {
   const navLinks = [
     { path: '/', label: 'Inicio' },
     { path: '/reservar', label: 'Reservar Pista' },
-    { path: '/clases', label: 'Clases' }
+    { path: '/clases', label: 'Clases' },
+    { path: '/clubs', label: 'Clubs' }
   ];
 
   const handleLogout = () => {
@@ -60,6 +61,15 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-4">
             {isAuthenticated ? (
               <>
+                {(user?.roleName === 'ADMIN' || user?.roleName === 'GESTOR') && (
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Panel Admin</span>
+                  </Link>
+                )}
                 <Link
                   to="/mi-perfil"
                   className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"

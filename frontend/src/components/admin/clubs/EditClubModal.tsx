@@ -54,10 +54,11 @@ export function EditClubModal({ isOpen, onClose, club }: EditClubModalProps) {
 
         setIsSubmitting(true);
         try {
-            // Filtrar valor especial de ownerSlug
+            // Filtrar valor especial de ownerSlug y convertir euros → céntimos
             const updateData = { 
                 ...data, 
                 status,
+                monthlyFeeCents: Math.round((data.monthlyFeeCents || 0) * 100),
                 ownerSlug: data.ownerSlug === '__none__' ? undefined : data.ownerSlug,
             };
             await updateMutation.mutateAsync({ slug: club.slug, data: updateData });
@@ -160,7 +161,7 @@ export function EditClubModal({ isOpen, onClose, club }: EditClubModalProps) {
                                 type="number"
                                 step="0.01"
                                 {...register('monthlyFeeCents', {
-                                    setValueAs: (v: string) => Math.round(parseFloat(v) * 100),
+                                    valueAsNumber: true,
                                     min: { value: 0, message: 'No puede ser negativo' },
                                 })}
                                 min="0"

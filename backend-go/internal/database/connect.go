@@ -2,7 +2,6 @@ package database
 
 import (
 	"backend-go/shared/database"
-	"backend-go/shared/security"
 	"fmt"
 	"log"
 	"os"
@@ -147,7 +146,7 @@ func generateClassSlug(title string, startTime time.Time) string {
 
 // createCustomConstraints añade constraints que GORM no maneja automáticamente
 func createCustomConstraints() error {
-	// Constraint de Exclusive Arc en payments (solo Booking o ClassEnrollment)
+	// Constraint de Exclusive Arc en payments (Booking, ClassEnrollment o ClubMembership)
 	err := DB.Exec(`
 		DO $$ BEGIN
 			IF NOT EXISTS (
@@ -155,7 +154,8 @@ func createCustomConstraints() error {
 			) THEN
 				ALTER TABLE payments ADD CONSTRAINT check_payment_origin CHECK (
 					(booking_id IS NOT NULL)::integer + 
-					(class_enrollment_id IS NOT NULL)::integer
+					(class_enrollment_id IS NOT NULL)::integer +
+					(club_membership_id IS NOT NULL)::integer
 					= 1
 				);
 			END IF;
@@ -201,79 +201,4 @@ func SeedData() error {
 	return nil
 }
 
-// seedDemoData inserta datos de demostración
-func seedDemoData() {
-	// Verificar si ya hay usuarios (aparte del sistema)
-	var userCount int64
-	DB.Model(&database.User{}).Count(&userCount)
-
-	if userCount > 0 {
-		log.Println("ℹ️  Datos de demostración ya existen, saltando seed...")
-		return
-	}
-
-	log.Println("🎭 Insertando datos de demostración...")
-
-	// Crear servicio de encriptación Argon2id
-	cryptoService := security.NewArgon2CryptoService()
-
-	// Hashear contraseña "admin123"
-	adminHash, _ := cryptoService.HashPassword("admin123")
-
-	// Usuario admin de prueba
-	phone1 := "+34600000001"
-	adminUser := database.User{
-		RoleID:       1,
-		Slug:         "admin-demo",
-		Email:        "admin@polimanage.com",
-		PasswordHash: adminHash, // admin123 con Argon2id
-		FullName:     "Admin Demo",
-		Phone:        &phone1,
-		IsActive:     true,
-	}
-	DB.Create(&adminUser)
-
-	// Usuario cliente de prueba
-	phone2 := "+34600000002"
-	clienteHash, _ := cryptoService.HashPassword("cliente123")
-	clientUser := database.User{
-		RoleID:       5,
-		Slug:         "cliente-demo",
-		Email:        "cliente@polimanage.com",
-		PasswordHash: clienteHash, // cliente123 con Argon2id
-		FullName:     "Cliente Demo",
-		Phone:        &phone2,
-		IsActive:     true,
-	}
-	DB.Create(&clientUser)
-
-	// Pistas con deportes reales
-	desc1 := "Césped artificial de alta calidad"
-	desc2 := "Césped artificial de alta calidad"
-	desc3 := "Cristal panorámico con iluminación LED"
-	desc4 := "Tierra batida profesional"
-	desc5 := "Superficie dura con marcado oficial"
-	desc6 := "Parquet deportivo con marcado para fútbol sala"
-	desc7 := "Parquet deportivo con marcado para baloncesto"
-	desc8 := "Parquet multiusos con red de voleibol"
-	desc9 := "Cemento pulido con paredes de vidrio"
-	desc10 := "Cemento pulido con paredes de vidrio"
-
-	pistas := []database.Pista{
-		{Name: "Pista Pádel 1", Slug: "pista-padel-1", Type: "Pádel", Status: "AVAILABLE", BasePriceCents: 2000, LocationInfo: &desc1},
-		{Name: "Pista Pádel 2", Slug: "pista-padel-2", Type: "Pádel", Status: "AVAILABLE", BasePriceCents: 2000, LocationInfo: &desc2},
-		{Name: "Pista Pádel 3", Slug: "pista-padel-3", Type: "Pádel", Status: "AVAILABLE", BasePriceCents: 2500, LocationInfo: &desc3},
-		{Name: "Pista Tenis 1", Slug: "pista-tenis-1", Type: "Tenis", Status: "AVAILABLE", BasePriceCents: 2200, LocationInfo: &desc4},
-		{Name: "Pista Tenis 2", Slug: "pista-tenis-2", Type: "Tenis", Status: "AVAILABLE", BasePriceCents: 2000, LocationInfo: &desc5},
-		{Name: "Pista Fútbol Sala", Slug: "pista-futbol-sala", Type: "Fútbol Sala", Status: "AVAILABLE", BasePriceCents: 3500, LocationInfo: &desc6},
-		{Name: "Pista Baloncesto", Slug: "pista-baloncesto", Type: "Baloncesto", Status: "AVAILABLE", BasePriceCents: 3000, LocationInfo: &desc7},
-		{Name: "Pista Voleibol", Slug: "pista-voleibol", Type: "Voleibol", Status: "AVAILABLE", BasePriceCents: 2500, LocationInfo: &desc8},
-		{Name: "Pista Squash 1", Slug: "pista-squash-1", Type: "Squash", Status: "AVAILABLE", BasePriceCents: 1800, LocationInfo: &desc9},
-		{Name: "Pista Squash 2", Slug: "pista-squash-2", Type: "Squash", Status: "AVAILABLE", BasePriceCents: 1800, LocationInfo: &desc10},
-	}
-	for _, pista := range pistas {
-		DB.Create(&pista)
-	}
-
-	log.Println("✅ Datos de demostración insertados")
-}
+// seedDemoData se define en seed.go

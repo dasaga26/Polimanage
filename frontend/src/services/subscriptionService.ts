@@ -12,8 +12,9 @@ export interface UpdateBillingDateData {
 export const subscriptionService = {
   // Obtener todas las membresías activas de todos los clubs
   getAllMemberships: async (): Promise<ClubMembership[]> => {
-    // Primero obtener todos los clubs
-    const { data: clubs } = await apiGo.get<Club[]>('/clubs');
+    // Primero obtener todos los clubs (respuesta paginada)
+    const { data: clubsPage } = await apiGo.get<{ data: Club[] }>('/clubs?limit=1000');
+    const clubs = clubsPage.data ?? [];
     
     // Luego obtener membresías de cada club
     const membershipPromises = clubs.map(async (club) => {
