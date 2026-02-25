@@ -20,4 +20,5 @@ func RegisterProfileRoutes(app *fiber.App, handler *ProfileHandler, jwtService s
 	profile.Get("/me", handler.GetMyProfile)
 	profile.Put("/me", handler.UpdateMyProfile)
 	profile.Post("/change-password", handler.ChangePassword)
+	profile.Post("/avatar", handler.UploadAvatar)
 }

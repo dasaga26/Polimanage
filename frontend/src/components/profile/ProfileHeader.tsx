@@ -35,10 +35,26 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onChangePhoto })
       {/* Header Gradient */}
       <div className="relative h-32 bg-gradient-to-r from-blue-600 to-indigo-600">
         <div className="absolute -bottom-10 left-8 flex items-end">
-          <div 
-            className="h-24 w-24 rounded-full border-4 border-white dark:border-slate-900 bg-cover bg-center shadow-md"
-            style={{ backgroundImage: `url(${profile.avatarUrl || defaultAvatar})` }}
-          />
+          <button
+            onClick={onChangePhoto}
+            className="group relative h-24 w-24 rounded-full border-4 border-white dark:border-slate-900 shadow-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            title="Cambiar foto de perfil"
+            aria-label="Cambiar foto de perfil"
+          >
+            <img
+              src={profile.avatarUrl || defaultAvatar}
+              alt={profile.fullName}
+              className="h-full w-full object-cover"
+            />
+            {/* Camera overlay on hover */}
+            <span className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="text-white text-xs mt-1 font-medium">Editar</span>
+            </span>
+          </button>
         </div>
       </div>
 
@@ -64,11 +80,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onChangePhoto })
             </div>
           </div>
           {onChangePhoto && (
-            <button 
+            <button
               onClick={onChangePhoto}
-              className="mt-4 sm:mt-0 text-sm text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+              className="mt-4 sm:mt-0 inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 font-semibold hover:underline"
             >
-              Cambiar foto de perfil
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Cambiar foto
             </button>
           )}
         </div>

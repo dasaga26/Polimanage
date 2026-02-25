@@ -43,22 +43,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const storedToken = localStorage.getItem(TOKEN_KEY);
+        let activeToken = localStorage.getItem(TOKEN_KEY);
 
-        if (storedToken) {
-          setToken(storedToken);
-          
-          // Validar token con el backend y obtener usuario
+        // Si no hay token en localStorage, intentar renovarlo con la cookie de refresh
+        if (!activeToken) {
           try {
-            const userData = await authService.getMe(storedToken);
-            setUser(userData);
-          } catch (error) {
-            // Token inválido o expirado - El interceptor manejará el refresh
-            console.error('Token inválido:', error);
-            localStorage.removeItem(TOKEN_KEY);
-            setToken(null);
-            setUser(null);
+            const refreshResponse = await authService.refreshToken();
+            activeToken = refreshResponse.accessToken;
+            localStorage.setItem(TOKEN_KEY, activeToken);
+          } catch {
+            // No hay sesión activa, continuar sin usuario
+            setIsLoading(false);
+            return;
           }
+        }
+
+        setToken(activeToken);
+
+        // Validar token con el backend y obtener usuario
+        try {
+          const userData = await authService.getMe(activeToken);
+          setUser(userData);
+        } catch (error) {
+          // Token inválido o expirado - limpiar estado
+          console.error('Token inválido:', error);
+          localStorage.removeItem(TOKEN_KEY);
+          setToken(null);
+          setUser(null);
         }
       } catch (error) {
         console.error('Error al inicializar autenticación:', error);

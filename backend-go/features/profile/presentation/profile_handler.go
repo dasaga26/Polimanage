@@ -4,6 +4,7 @@ import (
 	"backend-go/features/profile/application"
 	"backend-go/features/profile/domain"
 	"errors"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -140,6 +141,91 @@ func (h *ProfileHandler) ChangePassword(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"message": "Contraseña actualizada correctamente",
+	})
+}
+
+// UploadAvatar maneja POST /profile/avatar
+// @Summary Subir foto de perfil
+// @Tags profile
+// @Security BearerAuth
+// @Accept multipart/form-data
+// @Produce json
+// @Param avatar formData file true "Imagen del avatar (JPEG, PNG, WebP, GIF – máx. 5 MB)"
+// @Success 200 {object} map[string]string
+// @Router /api/profile/avatar [post]
+func (h *ProfileHandler) UploadAvatar(c *fiber.Ctx) error {
+	// Obtener userID del contexto
+	userID, ok := c.Locals("userID").(uuid.UUID)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Usuario no autenticado",
+		})
+	}
+
+	// Obtener el archivo del form
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "No se proporcionó ningún archivo",
+		})
+	}
+
+	// Validar tamaño (máx. 5 MB)
+	const maxSize = 5 * 1024 * 1024
+	if file.Size > maxSize {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "El archivo es demasiado grande (máx. 5 MB)",
+		})
+	}
+
+	// Validar tipo MIME
+	allowedTypes := map[string]string{
+		"image/jpeg": ".jpg",
+		"image/png":  ".png",
+		"image/webp": ".webp",
+		"image/gif":  ".gif",
+	}
+	contentType := file.Header.Get("Content-Type")
+	ext, allowed := allowedTypes[contentType]
+	if !allowed {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Tipo de archivo no permitido. Use JPEG, PNG, WebP o GIF",
+		})
+	}
+
+	// Generar nombre único y guardar
+	filename := uuid.New().String() + ext
+	savePath := "./static/avatars/" + filename
+
+	if err := os.MkdirAll("./static/avatars", 0755); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error al preparar el directorio de avatares",
+		})
+	}
+
+	if err := c.SaveFile(file, savePath); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error al guardar el archivo",
+		})
+	}
+
+	// Construir URL pública
+	baseURL := os.Getenv("APP_URL")
+	if baseURL == "" {
+		baseURL = "http://localhost:8080"
+	}
+	avatarURL := baseURL + "/static/avatars/" + filename
+
+	// Actualizar avatar en la base de datos
+	profile, err := h.profileService.UpdateMyProfile(userID, &domain.UpdateProfileData{
+		AvatarURL: &avatarURL,
+	})
+	if err != nil {
+		return handleProfileError(c, err)
+	}
+
+	return c.JSON(fiber.Map{
+		"avatarUrl": profile.AvatarURL,
 	})
 }
 

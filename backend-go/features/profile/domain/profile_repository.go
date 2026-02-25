@@ -19,4 +19,8 @@ type ProfileRepository interface {
 
 	// GetPasswordHash obtiene el hash de la contraseña del usuario
 	GetPasswordHash(userID uuid.UUID) (string, error)
+
+	// BumpSessionAndRevokeSessions incrementa el SessionVersion del usuario e invalida
+	// todas sus sesiones activas. Se llama tras un cambio de contraseña.
+	BumpSessionAndRevokeSessions(userID uuid.UUID) error
 }

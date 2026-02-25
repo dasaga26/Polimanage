@@ -52,10 +52,10 @@ type User struct {
 type RefreshSession struct {
 	ID               uint      `gorm:"primaryKey"`
 	UserID           uuid.UUID `gorm:"type:uuid;not null;index"`
-	DeviceID         string    `gorm:"type:varchar(255);not null;uniqueIndex"` // UUID único por navegador/app
-	FamilyID         uuid.UUID `gorm:"type:uuid;not null;index"`               // Agrupa cadenas de rotación
-	CurrentTokenHash string    `gorm:"type:varchar(255);not null"`             // Hash del único token válido
-	SessionVersion   int       `gorm:"not null"`                               // Snapshot de User.SessionVersion
+	DeviceID         string    `gorm:"type:varchar(255);not null;index"` // UUID único por navegador/app
+	FamilyID         uuid.UUID `gorm:"type:uuid;not null;index"`         // Agrupa cadenas de rotación
+	CurrentTokenHash string    `gorm:"type:varchar(255);not null"`       // Hash del único token válido
+	SessionVersion   int       `gorm:"not null"`                         // Snapshot de User.SessionVersion
 	ExpiresAt        time.Time `gorm:"type:timestamptz;not null;index"`
 	Revoked          bool      `gorm:"default:false;not null"`
 	Reason           string    `gorm:"type:varchar(50)"` // "logout", "reuse_detection", "replaced"

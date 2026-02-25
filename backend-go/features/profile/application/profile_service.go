@@ -77,5 +77,10 @@ func (s *ProfileService) ChangePassword(userID uuid.UUID, data *domain.ChangePas
 	}
 
 	// Actualizar contraseña
-	return s.profileRepo.ChangePassword(userID, currentHash, newHash)
+	if err := s.profileRepo.ChangePassword(userID, currentHash, newHash); err != nil {
+		return err
+	}
+
+	// Invalidar todas las sesiones activas (fuerza re-login en todos los dispositivos)
+	return s.profileRepo.BumpSessionAndRevokeSessions(userID)
 }

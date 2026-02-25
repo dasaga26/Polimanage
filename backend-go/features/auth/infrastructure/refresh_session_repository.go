@@ -48,10 +48,10 @@ func (r *RefreshSessionRepositoryImpl) GetByFamilyID(familyID uuid.UUID) (*domai
 	return toDomainEntity(&dbSession), nil
 }
 
-// GetByDeviceID busca una sesión por su DeviceID
+// GetByDeviceID busca la sesión activa (no revocada) de un dispositivo
 func (r *RefreshSessionRepositoryImpl) GetByDeviceID(deviceID string) (*domain.RefreshSessionEntity, error) {
 	var dbSession database.RefreshSession
-	result := r.db.Where("device_id = ?", deviceID).First(&dbSession)
+	result := r.db.Where("device_id = ? AND revoked = false", deviceID).First(&dbSession)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil

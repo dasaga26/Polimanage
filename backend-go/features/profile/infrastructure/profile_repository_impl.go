@@ -113,3 +113,21 @@ func (r *ProfileRepositoryImpl) GetPasswordHash(userID uuid.UUID) (string, error
 	}
 	return user.PasswordHash, nil
 }
+
+// BumpSessionAndRevokeSessions incrementa el session_version del usuario e invalida
+// todas sus sesiones de refresh token activas (se llama tras cambio de contraseña).
+func (r *ProfileRepositoryImpl) BumpSessionAndRevokeSessions(userID uuid.UUID) error {
+	// 1. Incrementar session_version para invalidar futuros refresh
+	if err := r.db.Model(&database.User{}).Where("id = ?", userID).
+		Update("session_version", gorm.Expr("session_version + 1")).Error; err != nil {
+		return err
+	}
+
+	// 2. Revocar todas las sesiones de refresh token activas
+	return r.db.Model(&database.RefreshSession{}).
+		Where("user_id = ? AND revoked = false", userID).
+		Updates(map[string]interface{}{
+			"revoked": true,
+			"reason":  "password_change",
+		}).Error
+}

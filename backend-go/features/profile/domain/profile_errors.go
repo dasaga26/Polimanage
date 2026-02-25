@@ -14,4 +14,7 @@ var (
 	ErrWeakPassword         = errors.New("la contraseña debe tener al menos 8 caracteres")
 	ErrUpdateFailed         = errors.New("error al actualizar el perfil")
 	ErrPasswordChangeFailed = errors.New("error al cambiar la contraseña")
+	ErrAvatarUploadFailed   = errors.New("error al subir el avatar")
+	ErrInvalidFileType      = errors.New("tipo de archivo no permitido")
+	ErrFileTooLarge         = errors.New("el archivo es demasiado grande")
 )

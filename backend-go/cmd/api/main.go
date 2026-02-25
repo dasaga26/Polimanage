@@ -79,7 +79,8 @@ func main() {
 	database.Connect()
 
 	app := fiber.New(fiber.Config{
-		AppName: "PoliManage Backend Go v2.0 - Clean Architecture",
+		AppName:   "PoliManage Backend Go v2.0 - Clean Architecture",
+		BodyLimit: 10 * 1024 * 1024, // 10 MB para subida de avatares
 	})
 
 	// Middleware CORS - V2: Soporte para cookies con withCredentials
@@ -219,6 +220,12 @@ func main() {
 	protectedAuth := app.Group("/api/auth")
 	protectedAuth.Use(sharedMiddleware.JWTMiddleware(jwtService))
 	authPres.RegisterProtectedAuthRoutes(protectedAuth, authHandler)
+
+	// ============================================================
+	// ARCHIVOS ESTÁTICOS - Avatares de usuario
+	// ============================================================
+	os.MkdirAll("./static/avatars", 0755)
+	app.Static("/static", "./static")
 
 	// ============================================================
 	// SWAGGER - Documentación de API
